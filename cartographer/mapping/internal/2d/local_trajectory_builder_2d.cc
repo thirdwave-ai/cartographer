@@ -186,6 +186,7 @@ LocalTrajectoryBuilder2D::AddRangeData(
   ++num_accumulated_;
 
   if (num_accumulated_ >= options_.num_accumulated_range_data()) {
+    LOG(INFO) << "Accumulated enough scans";
     const common::Time current_sensor_time = synchronized_data.time;
     absl::optional<common::Duration> sensor_duration;
     if (last_sensor_time_.has_value()) {
@@ -229,6 +230,7 @@ LocalTrajectoryBuilder2D::AddAccumulatedRangeData(
       sensor::AdaptiveVoxelFilter(options_.adaptive_voxel_filter_options())
           .Filter(gravity_aligned_range_data.returns);
   if (filtered_gravity_aligned_point_cloud.empty()) {
+    LOG(WARNING) << "No gravity aligned point cloud";
     return nullptr;
   }
 
