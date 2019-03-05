@@ -61,6 +61,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
       // The range data has not been fully accumulated yet.
       return;
     }
+    LOG(INFO) << "Range data has been accumulated\n";
     kLocalSlamMatchingResults->Increment();
     std::unique_ptr<InsertionResult> insertion_result;
     if (matching_result->insertion_result != nullptr) {
@@ -75,6 +76,9 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
           std::vector<std::shared_ptr<const Submap>>(
               matching_result->insertion_result->insertion_submaps.begin(),
               matching_result->insertion_result->insertion_submaps.end())});
+    }
+    else {
+      LOG(INFO) << "No insertion result";
     }
     if (local_slam_result_callback_) {
       local_slam_result_callback_(
