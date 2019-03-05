@@ -68,6 +68,7 @@ class GlobalTrajectoryBuilder : public mapping::TrajectoryBuilderInterface {
       auto node_id = pose_graph_->AddNode(
           matching_result->insertion_result->constant_data, trajectory_id_,
           matching_result->insertion_result->insertion_submaps);
+      LOG(INFO) << "Adding node " << node_id.node_index << '\n';
       CHECK_EQ(node_id.trajectory_id, trajectory_id_);
       insertion_result = absl::make_unique<InsertionResult>(InsertionResult{
           node_id, matching_result->insertion_result->constant_data,
