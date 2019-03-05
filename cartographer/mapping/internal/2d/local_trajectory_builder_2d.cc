@@ -287,6 +287,7 @@ LocalTrajectoryBuilder2D::InsertIntoSubmap(
   if (motion_filter_.IsSimilar(time, pose_estimate)) {
     return nullptr;
   }
+  LOG(INFO) << "Successfully inserted scan into submap";
   std::vector<std::shared_ptr<const Submap2D>> insertion_submaps =
       active_submaps_.InsertRangeData(range_data_in_local);
   return absl::make_unique<InsertionResult>(InsertionResult{
