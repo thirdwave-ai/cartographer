@@ -44,7 +44,6 @@ bool MotionFilter::IsSimilar(const common::Time time,
       << 100. * num_different_ / num_total_ << "%.";
   ++num_total_;
   if (num_total_ > 1 &&
-      time - last_time_ <= common::FromSeconds(options_.max_time_seconds()) &&
       (pose.translation() - last_pose_.translation()).norm() <=
           options_.max_distance_meters() &&
       transform::GetAngle(pose.inverse() * last_pose_) <=
@@ -52,14 +51,6 @@ bool MotionFilter::IsSimilar(const common::Time time,
     
     return true;
   }
-  bool timed_out = time - last_time_ <= common::FromSeconds(options_.max_time_seconds());
-  auto dt = time - last_time_;
-  bool translated_or_rotated = 
-      (pose.translation() - last_pose_.translation()).norm() <=
-          options_.max_distance_meters() &&
-      transform::GetAngle(pose.inverse() * last_pose_) <=
-          options_.max_angle_radians();
-  LOG(INFO) << "Was similar because time: " << dt.count() << " bounded at " << common::FromSeconds(options_.max_time_seconds()).count() << " and movement " << translated_or_rotated << '\n';
   last_time_ = time;
   last_pose_ = pose;
   ++num_different_;
