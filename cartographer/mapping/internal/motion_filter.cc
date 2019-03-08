@@ -53,7 +53,7 @@ bool MotionFilter::IsSimilar(const common::Time time,
     return true;
   }
   bool timed_out = time - last_time_ <= common::FromSeconds(options_.max_time_seconds());
-  common::Time dt = time - last_time_;
+  auto dt = time - last_time_;
   bool translated_or_rotated = 
       (pose.translation() - last_pose_.translation()).norm() <=
           options_.max_distance_meters() &&
