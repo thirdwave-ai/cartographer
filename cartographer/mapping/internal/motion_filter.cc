@@ -59,7 +59,7 @@ bool MotionFilter::IsSimilar(const common::Time time,
           options_.max_distance_meters() &&
       transform::GetAngle(pose.inverse() * last_pose_) <=
           options_.max_angle_radians();
-  LOG(INFO) << "Was similar because time: " << dt.count() << << " bounded at " << common::FromSeconds(options_.max_time_seconds()).count() << " and movement " << translated_or_rotated << '\n';
+  LOG(INFO) << "Was similar because time: " << dt.count() << " bounded at " << common::FromSeconds(options_.max_time_seconds()).count() << " and movement " << translated_or_rotated << '\n';
   last_time_ = time;
   last_pose_ = pose;
   ++num_different_;
