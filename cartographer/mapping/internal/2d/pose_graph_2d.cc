@@ -589,7 +589,7 @@ void PoseGraph2D::WaitForAllComputations() {
     report_progress();
   }
   CHECK_EQ(constraint_builder_.GetNumFinishedNodes(), num_trajectory_nodes);
-  std::cout << "\r\x1b[KOptimizing: Done.     " << std::endl;
+  LOG(INFO) << "\r\x1b[KOptimizing: Done.     " << std::endl;
 }
 
 void PoseGraph2D::DeleteTrajectory(const int trajectory_id) {
