@@ -150,8 +150,9 @@ LocalTrajectoryBuilder2D::AddRangeData(
       }
       time_point = extrapolator_->GetLastExtrapolatedTime();
     }
-    range_data_poses.push_back(
-        extrapolator_->ExtrapolatePose(time_point).cast<float>());
+    auto extrapolated_pose = extrapolator_->ExtrapolatePose(time_point).cast<float>();
+    LOG(INFO) << "Extrapolated pose for range data; " << extrapolated_pose << '\n';
+    range_data_poses.push_back(extrapolated_pose);
   }
 
   if (num_accumulated_ == 0) {
