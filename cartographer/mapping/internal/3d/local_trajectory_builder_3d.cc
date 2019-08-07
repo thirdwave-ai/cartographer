@@ -104,6 +104,7 @@ std::unique_ptr<transform::Rigid3d> LocalTrajectoryBuilder3D::ScanMatch(
 }
 
 void LocalTrajectoryBuilder3D::AddImuData(const sensor::ImuData& imu_data) {
+  LOG(INFO) << "Adding Imu data";
   if (extrapolator_ != nullptr) {
     extrapolator_->AddImuData(imu_data);
     return;
