@@ -63,7 +63,7 @@ void ImuTracker::AddImuLinearAccelerationObservation(
   const Eigen::Quaterniond rotation = Eigen::Quaterniond::FromTwoVectors(
       gravity_vector_, orientation_.conjugate() * Eigen::Vector3d::UnitZ());
   orientation_ = (orientation_ * rotation).normalized();
-  CHECK_GT((orientation_ * gravity_vector_).z(), 0.) << "Imu tracker orientation " << orientation_ << " gravity " << gravity_vector_;
+  CHECK_GT((orientation_ * gravity_vector_).z(), 0.) << "Imu tracker gravity " << gravity_vector_;
   CHECK_GT((orientation_ * gravity_vector_).normalized().z(), 0.99);
 }
 
