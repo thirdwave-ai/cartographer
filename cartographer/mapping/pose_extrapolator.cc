@@ -140,8 +140,15 @@ transform::Rigid3d PoseExtrapolator::ExtrapolatePose(const common::Time time) {
     const Eigen::Quaterniond rotation =
         newest_timed_pose.pose.rotation() *
         ExtrapolateRotation(time, extrapolation_imu_tracker_.get());
+    
+    // Only use rotaiton about Z
+    Eigen::Quaterniond x_axis{0, 1, 0, 0};
+    x_axis = rotation * x_axis * rotation.conjugate();
+    auto ang_axis = Eigen::AngleAxisd(atan2(x_axis.y(), x_axis.x()), Vector3d::UnitZ());
+    Eigen::Quaterniond flat_rotation(ang_axis);
+
     cached_extrapolated_pose_ =
-        TimedPose{time, transform::Rigid3d{translation, rotation}};
+        TimedPose{time, transform::Rigid3d{translation, flat_rotation}};
   }
   return cached_extrapolated_pose_.pose;
 }
