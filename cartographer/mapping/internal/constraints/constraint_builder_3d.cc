@@ -278,7 +278,7 @@ void ConstraintBuilder3D::ComputeConstraint(
          << " points on submap " << submap_id << std::fixed;
     if (match_full_submap) {
       info << " matches with score" << match_result->score << " rotation score " << match_result->rotational_score << " low_resolution_score " << match_result->low_resolution_score << " with transform of " << match_result->pose_estimate.DebugString() << std::endl;
-      std::cerr << info;
+      std::cerr << info.str();
     } else {
       // Compute the difference between (submap i <- node j) according to loop
       // closure ('constraint_transform') and according to global SLAM state.
