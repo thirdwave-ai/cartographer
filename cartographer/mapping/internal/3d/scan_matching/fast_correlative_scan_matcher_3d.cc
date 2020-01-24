@@ -190,6 +190,7 @@ FastCorrelativeScanMatcher3D::MatchWithSearchParameters(
   const Candidate3D best_candidate = BranchAndBound(
       search_parameters, discrete_scans, lowest_resolution_candidates,
       precomputation_grid_stack_->max_depth(), min_score);
+  std::cerr << "best candidate " << best_candidate.score << std::endl;
   if (best_candidate.score > min_score) {
     return absl::make_unique<Result>(Result{
         best_candidate.score,
