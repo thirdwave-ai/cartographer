@@ -149,6 +149,7 @@ FastCorrelativeScanMatcher3D::MatchFullSubmap(
     const Eigen::Quaterniond& global_submap_rotation,
     const TrajectoryNode::Data& constant_data, const float min_score) const {
   float max_point_distance = 0.f;
+  std::cerr << "MATCH IN PROGRESS" <<std::endl;
   for (const sensor::RangefinderPoint& point :
        constant_data.high_resolution_point_cloud) {
     max_point_distance = std::max(max_point_distance, point.position.norm());
@@ -156,6 +157,7 @@ FastCorrelativeScanMatcher3D::MatchFullSubmap(
   const int linear_window_size =
       (width_in_voxels_ + 1) / 2 +
       common::RoundToInt(max_point_distance / resolution_ + 0.5f);
+  std::cerr << "LOW RES STARTED" << std::endl;
   const auto low_resolution_matcher = scan_matching::CreateLowResolutionMatcher(
       low_resolution_hybrid_grid_, &constant_data.low_resolution_point_cloud);
   const SearchParameters search_parameters{
