@@ -274,6 +274,7 @@ void ConstraintBuilder3D::ComputeConstraint(
       Constraint::INTER_SUBMAP});
 
   if (options_.log_matches()) {
+    std::cerr << "Log match" << std::endl;
     std::ostringstream info;
     info << "Node " << node_id << " with "
          << constant_data->high_resolution_point_cloud.size()
