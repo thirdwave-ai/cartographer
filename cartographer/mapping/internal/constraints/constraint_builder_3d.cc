@@ -209,7 +209,7 @@ void ConstraintBuilder3D::ComputeConstraint(
   // 3. Refine.
   if (match_full_submap) {
     kGlobalConstraintsSearchedMetric->Increment();
-    std::cerr << "Attemp submap match" << std::endl;
+    std::cerr << "Attempt submap match" << std::endl;
     match_result =
         submap_scan_matcher.fast_correlative_scan_matcher->MatchFullSubmap(
             global_node_pose.rotation(), global_submap_pose.rotation(),
@@ -225,6 +225,7 @@ void ConstraintBuilder3D::ComputeConstraint(
       kGlobalConstraintLowResolutionScoresMetric->Observe(
           match_result->low_resolution_score);
     } else {
+      std::cerr << "Match failed " << std::endl;
       return;
     }
   } else {
