@@ -224,6 +224,7 @@ void ConstraintBuilder3D::ComputeConstraint(
           match_result->rotational_score);
       kGlobalConstraintLowResolutionScoresMetric->Observe(
           match_result->low_resolution_score);
+      std::cerr << "CHECK" << std::endl;
     } else {
       std::cerr << "Match failed " << std::endl;
       return;
