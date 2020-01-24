@@ -291,7 +291,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     }
     info << " with score " << std::setprecision(1) << 100. * match_result->score
          << "%.";
-    LOG(INFO) << info.str();
+    std::cerr << info.str() << std::endl;
   }
 }
 
