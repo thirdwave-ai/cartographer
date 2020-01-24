@@ -273,7 +273,7 @@ void ConstraintBuilder3D::ComputeConstraint(
        options_.loop_closure_rotation_weight()},
       Constraint::INTER_SUBMAP});
 
-  if (options_.log_matches()) {
+  if (true) {
     std::cerr << "Log match" << std::endl;
     std::ostringstream info;
     info << "Node " << node_id << " with "
