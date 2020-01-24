@@ -214,6 +214,7 @@ void ConstraintBuilder3D::ComputeConstraint(
         submap_scan_matcher.fast_correlative_scan_matcher->MatchFullSubmap(
             global_node_pose.rotation(), global_submap_pose.rotation(),
             *constant_data, options_.global_localization_min_score());
+    std::cerr << "MATCH done" << std::endl;
     if (match_result != nullptr) {
       CHECK_GT(match_result->score, options_.global_localization_min_score());
       CHECK_GE(node_id.trajectory_id, 0);
