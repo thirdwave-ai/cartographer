@@ -180,12 +180,16 @@ FastCorrelativeScanMatcher3D::MatchWithSearchParameters(
     const sensor::PointCloud& point_cloud,
     const Eigen::VectorXf& rotational_scan_matcher_histogram,
     const Eigen::Quaterniond& gravity_alignment, const float min_score) const {
+
+  std::cerr << "1" << std::endl;
   const std::vector<DiscreteScan3D> discrete_scans = GenerateDiscreteScans(
       search_parameters, point_cloud, rotational_scan_matcher_histogram,
       gravity_alignment, global_node_pose, global_submap_pose);
+  std::cerr << "2" << std::endl;
 
   const std::vector<Candidate3D> lowest_resolution_candidates =
       ComputeLowestResolutionCandidates(search_parameters, discrete_scans);
+  std::cerr << "3" << std::endl;
 
   const Candidate3D best_candidate = BranchAndBound(
       search_parameters, discrete_scans, lowest_resolution_candidates,
