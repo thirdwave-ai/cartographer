@@ -247,10 +247,12 @@ void ConstraintBuilder3D::ComputeConstraint(
     }
   }
   {
+    std::cerr << "Create score histograpm" << std::endl;
     absl::MutexLock locker(&mutex_);
     score_histogram_.Add(match_result->score);
     rotational_score_histogram_.Add(match_result->rotational_score);
     low_resolution_score_histogram_.Add(match_result->low_resolution_score);
+    std::cerr << "Scoring done" << std::endl;
   }
 
   // Use the CSM estimate as both the initial and previous pose. This has the
@@ -272,16 +274,14 @@ void ConstraintBuilder3D::ComputeConstraint(
       {constraint_transform, options_.loop_closure_translation_weight(),
        options_.loop_closure_rotation_weight()},
       Constraint::INTER_SUBMAP});
-
+  std::cerr << "Log match" << std::endl;
   if (true) {
-    std::cerr << "Log match" << std::endl;
     std::ostringstream info;
     info << "Node " << node_id << " with "
          << constant_data->high_resolution_point_cloud.size()
          << " points on submap " << submap_id;
     if (match_full_submap) {
       info << " matches with score" << match_result->score << " rotation score " << match_result->rotational_score << " low_resolution_score " << match_result->low_resolution_score << " with transform of " << match_result->pose_estimate.DebugString() << std::endl;
-      std::cerr << info.str();
     } else {
       // Compute the difference between (submap i <- node j) according to loop
       // closure ('constraint_transform') and according to global SLAM state.
