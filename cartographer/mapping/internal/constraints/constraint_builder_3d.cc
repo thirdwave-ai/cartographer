@@ -291,7 +291,8 @@ void ConstraintBuilder3D::ComputeConstraint(
                                             global_submap_pose *
                                             constraint_transform;
       auto translation = difference.translation();
-      std::stringstream ss << translation;
+      std::stringstream ss;
+      ss << translation;
       info << " differs by translation " << std::setprecision(2)
            << ss.str() << " rotation "
            << std::setprecision(3) << transform::GetAngle(difference);
