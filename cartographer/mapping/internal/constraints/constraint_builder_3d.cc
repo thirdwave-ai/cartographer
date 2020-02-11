@@ -290,7 +290,8 @@ void ConstraintBuilder3D::ComputeConstraint(
       const transform::Rigid3d difference = global_node_pose.inverse() *
                                             global_submap_pose *
                                             constraint_transform;
-      std::stringstream ss << difference.translation();
+      auto translation = difference.translation();
+      std::stringstream ss << translation;
       info << " differs by translation " << std::setprecision(2)
            << ss.str() << " rotation "
            << std::setprecision(3) << transform::GetAngle(difference);
