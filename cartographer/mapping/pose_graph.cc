@@ -166,6 +166,8 @@ proto::PoseGraph PoseGraph::ToProto(bool include_unfinished_submaps) const {
   auto constraints_copy = constraints();
   std::set<mapping::NodeId> orphaned_nodes;
   proto.mutable_constraint()->Reserve(constraints_copy.size());
+  std::cerr << "NUM CONSTRAINTS WHILE SAVING " << constraints_copy.size() << std::endl;
+  int num_added_to_proto = 0;
   for (auto it = constraints_copy.begin(); it != constraints_copy.end();) {
     if (!include_unfinished_submaps &&
         unfinished_submaps.count(it->submap_id) > 0) {
@@ -176,8 +178,10 @@ proto::PoseGraph PoseGraph::ToProto(bool include_unfinished_submaps) const {
       continue;
     }
     *proto.add_constraint() = cartographer::mapping::ToProto(*it);
+    num_added_to_proto++;
     ++it;
   }
+  std::cerr << "ADDED " << num_added_to_proto << " CONSTRAINTS ADDED TO MAP PROTOSTREAM" << std::endl; 
 
   if (!include_unfinished_submaps) {
     // Iterate over all constraints and remove trajectory nodes from
