@@ -133,6 +133,7 @@ proto::PoseGraph::Constraint ToProto(const PoseGraph::Constraint& constraint) {
 }
 
 proto::PoseGraph PoseGraph::ToProto(bool include_unfinished_submaps) const {
+  std::cerr << "CONVERTING POSE GRAPH TO PROTO" << std::endl;
   proto::PoseGraph proto;
 
   std::map<int, proto::Trajectory* const> trajectory_protos;
@@ -170,7 +171,7 @@ proto::PoseGraph PoseGraph::ToProto(bool include_unfinished_submaps) const {
   int num_added_to_proto = 0;
   for (auto it = constraints_copy.begin(); it != constraints_copy.end();) {
     if (!include_unfinished_submaps &&
-        unfinished_submaps.count(it->submap_id) > 0) {
+      unfinished_submaps.count(it->submap_id) > 0) {
       // Skip all those constraints that refer to unfinished submaps and
       // remember the corresponding trajectory nodes as potentially orphaned.
       orphaned_nodes.insert(it->node_id);
