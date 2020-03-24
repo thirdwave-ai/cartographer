@@ -187,7 +187,7 @@ proto::PoseGraph PoseGraph::ToProto(bool include_unfinished_submaps) const {
     ++it;
   }
   std::cerr << "ADDED " << num_added_to_proto << " CONSTRAINTS ADDED TO MAP PROTOSTREAM" << std::endl; 
-  std::cerr << "INCLUDES " << num_inter_submap_constraints << " INTER SUBMAP CONSTRAINTS"
+  std::cerr << "INCLUDES " << num_inter_submap_constraints << " INTER SUBMAP CONSTRAINTS" << std::endl;
   if (!include_unfinished_submaps) {
     // Iterate over all constraints and remove trajectory nodes from
     // 'orphaned_nodes' that are not actually orphaned.
