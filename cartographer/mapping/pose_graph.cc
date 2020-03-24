@@ -53,6 +53,7 @@ std::vector<PoseGraph::Constraint> FromProto(
     const ::google::protobuf::RepeatedPtrField<proto::PoseGraph::Constraint>&
         constraint_protos) {
   std::vector<PoseGraph::Constraint> constraints;
+  int num_inter_constraints = 0;
   for (const auto& constraint_proto : constraint_protos) {
     const mapping::SubmapId submap_id{
         constraint_proto.submap_id().trajectory_id(),
@@ -64,8 +65,12 @@ std::vector<PoseGraph::Constraint> FromProto(
         constraint_proto.translation_weight(),
         constraint_proto.rotation_weight()};
     const PoseGraph::Constraint::Tag tag = FromProto(constraint_proto.tag());
+    if (tag == PoseGraph::Constraint::INTER_SUBMAP) {
+      num_inter_constraints++;
+    }
     constraints.push_back(PoseGraph::Constraint{submap_id, node_id, pose, tag});
   }
+  std::cerr << "Num constraints loaded from proto " << constraints.size() << " and " << num_inter_constraints << " inter constraints" << std::endl;
   return constraints;
 }
 
