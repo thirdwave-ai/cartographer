@@ -174,7 +174,7 @@ class MapById {
     }
 
     IdDataReference operator*() const {
-      CHECK(current_trajectory_ != end_trajectory_);
+      CHECK(current_trajectory_ != end_trajectory_) << "Current Trajectory " << current_trajectory_ << ", " << "End Trajectory " << end_trajectory_;
       return IdDataReference{
           IdType{current_trajectory_->first, current_data_->first},
           current_data_->second};
