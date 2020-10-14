@@ -174,7 +174,9 @@ class MapById {
     }
 
     IdDataReference operator*() const {
-      CHECK(current_trajectory_ != end_trajectory_) << "Current Trajectory ";
+      std::stringstream ss;
+      ss << "Current Trajectory vs end " << current_trajectory_ << ", " << end_trajectory_ 
+      CHECK(current_trajectory_ != end_trajectory_) << ss.str();
       return IdDataReference{
           IdType{current_trajectory_->first, current_data_->first},
           current_data_->second};
