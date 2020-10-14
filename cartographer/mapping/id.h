@@ -175,7 +175,7 @@ class MapById {
 
     IdDataReference operator*() const {
       std::stringstream ss;
-      ss << "Current Trajectory vs end " << itoa(current_trajectory_) << ", " << itoa(end_trajectory_);
+      ss << "Current Trajectory vs end " << std::to_string(current_trajectory_) << ", " << std::to_string(end_trajectory_);
       CHECK(current_trajectory_ != end_trajectory_) << ss.str();
       return IdDataReference{
           IdType{current_trajectory_->first, current_data_->first},
