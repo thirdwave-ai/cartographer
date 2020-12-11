@@ -63,9 +63,11 @@ static std::array<T, 6> ComputeUnscaledError(
                                          -start_rotation[2],
                                          -start_rotation[3]);
 
+  // scale to apply to z dimension to reduce drift
+  const double z_scale = 100.0;
   const Eigen::Matrix<T, 3, 1> delta(end_translation[0] - start_translation[0],
                                      end_translation[1] - start_translation[1],
-                                     end_translation[2] - start_translation[2]);
+                                     z_scale*(end_translation[2] - start_translation[2]));
   const Eigen::Matrix<T, 3, 1> h_translation = R_i_inverse * delta;
 
   const Eigen::Quaternion<T> h_rotation_inverse =
@@ -77,7 +79,7 @@ static std::array<T, 6> ComputeUnscaledError(
   const Eigen::Matrix<T, 3, 1> angle_axis_difference =
       transform::RotationQuaternionToAngleAxisVector(
           h_rotation_inverse * relative_pose.rotation().cast<T>());
-
+  
   return {{T(relative_pose.translation().x()) - h_translation[0],
            T(relative_pose.translation().y()) - h_translation[1],
            T(relative_pose.translation().z()) - h_translation[2],
