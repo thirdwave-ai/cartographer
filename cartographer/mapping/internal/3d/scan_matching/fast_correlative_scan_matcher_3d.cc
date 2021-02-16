@@ -323,7 +323,7 @@ FastCorrelativeScanMatcher3D::GenerateLowestResolutionCandidates(
   try {
     candidates.reserve(num_candidates);
   } catch (...) {
-    candidates.resize(0);
+    candidates.reserve(0);
     return candidates;
   }
   for (int scan_index = 0; scan_index != num_discrete_scans; ++scan_index) {
