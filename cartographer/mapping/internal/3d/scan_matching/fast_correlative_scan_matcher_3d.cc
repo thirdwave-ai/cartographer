@@ -320,7 +320,12 @@ FastCorrelativeScanMatcher3D::GenerateLowestResolutionCandidates(
       common::Power(num_lowest_resolution_linear_xy_candidates, 2) *
       num_lowest_resolution_linear_z_candidates;
   std::vector<Candidate3D> candidates;
-  candidates.reserve(num_candidates);
+  try {
+    candidates.reserve(num_candidates);
+  } catch (...) {
+    candidates.resize(0);
+    return candidates;
+  }
   for (int scan_index = 0; scan_index != num_discrete_scans; ++scan_index) {
     for (int z = -search_parameters.linear_z_window_size;
          z <= search_parameters.linear_z_window_size; z += linear_step_size) {
