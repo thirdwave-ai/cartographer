@@ -82,13 +82,17 @@ void ConstraintBuilder3D::MaybeAddConstraint(
     const transform::Rigid3d& global_submap_pose,
     std::function<void(
       scan_matching::FastCorrelativeScanMatcher3D::Result,  // Coarse search
-      std::optional<Constraint> 
+      std::optional<Constraint>
     )> loop_closure_cb) {
   if ((global_node_pose.translation() - global_submap_pose.translation())
           .norm() > options_.max_constraint_distance()) {
+    LOG(INFO) << "Skipped (s: " << submap_id.trajectory_id << ", n: " << node_id.trajectory_id << ") because of max_constraint_distance.";
     return;
   }
-  if (!sampler_.Pulse()) return;
+  if (!sampler_.Pulse())  {
+    LOG(INFO) << "Skipped (s: " << submap_id.trajectory_id << ", n: " << node_id.trajectory_id << ") because of Pulse.";
+    return;
+  }
 
   absl::MutexLock locker(&mutex_);
   if (when_done_) {
@@ -208,7 +212,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     std::unique_ptr<Constraint>* constraint,
     std::function<void(
       scan_matching::FastCorrelativeScanMatcher3D::Result,  // Course search
-      std::optional<Constraint> 
+      std::optional<Constraint>
     )> loop_closure_cb) {
   CHECK(submap_scan_matcher.fast_correlative_scan_matcher);
   // The 'constraint_transform' (submap i <- node j) is computed from:
@@ -239,8 +243,10 @@ void ConstraintBuilder3D::ComputeConstraint(
           match_result->low_resolution_score);
     } else if(match_result != nullptr && loop_closure_cb) {
       loop_closure_cb(scan_matching::FastCorrelativeScanMatcher3D::Result(*match_result),{});
+      LOG(INFO) << "Skipped (s: " << submap_id.trajectory_id << ", n: " << node_id.trajectory_id << ") because no success (match_full).";
       return;
     } else {
+      LOG(INFO) << "Skipped (s: " << submap_id.trajectory_id << ", n: " << node_id.trajectory_id << ") because no match_result (match_full).";
       return;
     }
   } else {
@@ -259,8 +265,10 @@ void ConstraintBuilder3D::ComputeConstraint(
           match_result->low_resolution_score);
     } else if(match_result != nullptr && loop_closure_cb) {
       loop_closure_cb(scan_matching::FastCorrelativeScanMatcher3D::Result(*match_result),{});
+      LOG(INFO) << "Skipped (s: " << submap_id.trajectory_id << ", n: " << node_id.trajectory_id << ") because no success";
       return;
     } else {
+      LOG(INFO) << "Skipped (s: " << submap_id.trajectory_id << ", n: " << node_id.trajectory_id << ") because no match_result.";
       return;
     }
   }
