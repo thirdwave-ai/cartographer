@@ -248,9 +248,11 @@ void ConstraintBuilder3D::ComputeConstraint(
           scan_matching::FastCorrelativeScanMatcher3D::Result(*match_result),
           {});
       LOG(INFO) << "Skipped (s: " << submap_id << ", n: " << node_id
-                << ") because no success (match_full).";
+                << ") because no success (match_full score: "
+                << match_result->score << ")";
       return;
     } else {
+      CHECK(match_result == nullptr);
       LOG(INFO) << "Skipped (s: " << submap_id << ", n: " << node_id
                 << ") because no match_result (match_full).";
       return;
@@ -274,9 +276,11 @@ void ConstraintBuilder3D::ComputeConstraint(
           scan_matching::FastCorrelativeScanMatcher3D::Result(*match_result),
           {});
       LOG(INFO) << "Skipped (s: " << submap_id << ", n: " << node_id
-                << ") because no success";
+                << ") because no success (score: " << match_result->score
+                << ")";
       return;
     } else {
+      CHECK(match_result == nullptr);
       LOG(INFO) << "Skipped (s: " << submap_id << ", n: " << node_id
                 << ") because no match_result.";
       return;
