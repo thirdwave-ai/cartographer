@@ -303,15 +303,13 @@ void PoseGraph3D::ComputeConstraint(const NodeId& node_id,
   }
 
   if (maybe_add_local_constraint) {
-    constraint_builder_.MaybeAddConstraint(submap_id, submap, node_id,
-                                           constant_data, global_node_pose,
-                                           global_submap_pose,
-                                           loop_closure_cb_);
+    constraint_builder_.MaybeAddConstraint(
+        submap_id, submap, node_id, constant_data, global_node_pose,
+        global_submap_pose, loop_closure_cb_);
   } else if (maybe_add_global_constraint) {
     constraint_builder_.MaybeAddGlobalConstraint(
         submap_id, submap, node_id, constant_data, global_node_pose.rotation(),
-        global_submap_pose.rotation(),
-        loop_closure_cb_);
+        global_submap_pose.rotation(), loop_closure_cb_);
   }
 }
 
@@ -353,16 +351,13 @@ WorkItem::Result PoseGraph3D::ComputeConstraintsForNode(
            options_.matcher_rotation_weight()},
           Constraint::INTRA_SUBMAP});
       if (node_insertion_cb_) {
-        node_insertion_cb_(
-          data_.trajectory_nodes.at(node_id), 
-          Constraint{
-            submap_id,
-            node_id,
-            {constraint_transform, options_.matcher_translation_weight(),
-              options_.matcher_rotation_weight()},
-            Constraint::INTRA_SUBMAP
-          }
-        );
+        node_insertion_cb_(data_.trajectory_nodes.at(node_id),
+                           Constraint{submap_id,
+                                      node_id,
+                                      {constraint_transform,
+                                       options_.matcher_translation_weight(),
+                                       options_.matcher_rotation_weight()},
+                                      Constraint::INTRA_SUBMAP});
       }
     }
     // TODO(gaschler): Consider not searching for constraints against
@@ -545,7 +540,7 @@ void PoseGraph3D::DrainWorkQueue() {
     process_work_queue = work_item() == WorkItem::Result::kDoNotRunOptimization;
   }
   LOG(INFO) << "Remaining work items in queue: " << work_queue_size;
-  if (work_items_queue_cb_){
+  if (work_items_queue_cb_) {
     work_items_queue_cb_(work_queue_size);
   }
   // We have to optimize again.
