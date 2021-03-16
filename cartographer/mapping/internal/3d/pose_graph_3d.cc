@@ -477,6 +477,7 @@ void PoseGraph3D::DeleteTrajectoriesIfNeeded() {
 
 void PoseGraph3D::HandleWorkQueue(
     const constraints::ConstraintBuilder3D::Result& result) {
+  auto start_handle_work_queue = absl::Now();
   {
     absl::MutexLock locker(&mutex_);
     data_.constraints.insert(data_.constraints.end(), result.begin(),
@@ -547,7 +548,8 @@ void PoseGraph3D::HandleWorkQueue(
     kConstraintsDifferentTrajectoryMetric->Set(
         inter_constraints_different_trajectory);
   }
-
+  auto handle_work_queue_dir = absl::Now() - start_handle_work_queue;
+  std::cerr << "WORK_QUEUE_PROFILE (HANDLE_WORK_QUEUE): " << absl::FormatDuration(handle_work_queue_dir) << std::endl; 
   DrainWorkQueue();
 }
 
