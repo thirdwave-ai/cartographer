@@ -558,6 +558,7 @@ void PoseGraph3D::DrainWorkQueue() {
   size_t work_queue_size;
   WorkItem::Details cummulative_queue_details;
   std::map<WorkItemType, std::chrono::system_clock::duration> processed_time_spent;
+  auto process_work_queue_start = absl::Now();
   while (process_work_queue) {
     WorkItemType work_item_type;
     std::function<std::pair<WorkItem::Result, WorkItem::Details>()> work_item;
@@ -604,12 +605,13 @@ void PoseGraph3D::DrainWorkQueue() {
     characterization.cummulative_processed_queue_details = cummulative_queue_details;
     work_items_queue_cb_(std::chrono::steady_clock::now(), work_queue_size, characterization);
   }
+  std::cerr << "WORK_QUEUE_PROFILE (work queue processed for) " << absl::FormatDuration(absl::Now() - process_work_queue_start) << std::endl;
   // We have to optimize again.
-  auto callback_set_time = absl::Now();
+  std::cerr << "WORK_QUEUE_PROFILE (constraint builder when done) " << absl::FormatTime(absl::Now()) << std::endl;
   constraint_builder_.WhenDone(
       [this](const constraints::ConstraintBuilder3D::Result& result) {
         HandleWorkQueue(result);
-        std::cerr << "WORK_QUEUE_PROFILE (constraint builder when done finished) " << absl::FormatDuration(absl::Now()-callback_set_time) << std::endl;
+        std::cerr << "WORK_QUEUE_PROFILE (constraint builder when done finished) " << absl::FormatTime(absl::Now()) << std::endl;
       });
 }
 
