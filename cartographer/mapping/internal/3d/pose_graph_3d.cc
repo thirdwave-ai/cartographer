@@ -565,6 +565,7 @@ void PoseGraph3D::DrainWorkQueue() {
     WorkItemType work_item_type;
     std::function<std::pair<WorkItem::Result, WorkItem::Details>()> work_item;
     {
+      absl::MutexLock locker(&work_queue_mutex_);
       if (work_queue_->empty()) {
         work_queue_.reset();
         return;
@@ -609,6 +610,7 @@ void PoseGraph3D::DrainWorkQueue() {
   std::cerr << "WORK_QUEUE_PROFILE (work queue processed for) " << absl::FormatDuration(absl::Now() - process_work_queue_start) << std::endl;
   // We have to optimize again.
   std::cerr << "WORK_QUEUE_PROFILE (constraint builder when done) " << absl::FormatTime(absl::Now()) << std::endl;
+  
   constraint_builder_.WhenDone(
       [this](const constraints::ConstraintBuilder3D::Result& result) {
         HandleWorkQueue(result);
