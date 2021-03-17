@@ -294,6 +294,7 @@ class PoseGraph3D : public PoseGraph {
   // Local slam node created
   std::function<void(const TrajectoryNode&)> local_slam_node_cb_;
 
+  bool initial_items_added{false};
   std::vector<absl::Time> drain_queue_enter_;
 
   // Allows querying and manipulating the pose graph by the 'trimmers_'. The
