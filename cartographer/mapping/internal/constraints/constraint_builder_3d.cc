@@ -350,6 +350,7 @@ void ConstraintBuilder3D::RunWhenDoneCallback() {
     when_done_.reset();
     kQueueLengthMetric->Set(constraints_.size());
   }
+  std::cerr << "WORK_QUEUE_PROFILE (end constraint callback)" << absl::FormatTime(absl::Now()) << std::endl;
   (*callback)(result);
 }
 

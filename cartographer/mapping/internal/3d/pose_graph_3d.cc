@@ -554,6 +554,13 @@ void PoseGraph3D::HandleWorkQueue(
 }
 
 void PoseGraph3D::DrainWorkQueue() {
+  drain_queue_enter_.push_back(absl::Now());
+  if (drain_queue_enter_.size() % 10 == 0) {
+    std::cerr << "==========================================" << std::endl;
+    for (auto& time: drain_queue_enter_) {
+      std::cerr << "WORK_QUEUE_HISTORY " << absl::FormatTime(time) << std::endl;
+    }
+  }
   bool process_work_queue = true;
   size_t work_queue_size;
   WorkItem::Details cummulative_queue_details;
