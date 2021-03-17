@@ -477,6 +477,8 @@ void PoseGraph3D::DeleteTrajectoriesIfNeeded() {
 
 void PoseGraph3D::HandleWorkQueue(
     const constraints::ConstraintBuilder3D::Result& result) {
+
+  std::cerr << "WORK_QUEUE_PROFILE (constraint_processesing time) " << absl::FormatDuration(absl::Now() - constraint_builder_start_) << std::endl;
   std::cerr << "WORK_QUEUE_PROFILE Start of handle work queue " << absl::FormatTime(absl::Now()) << std::endl;
   auto start_handle_work_queue = absl::Now();
   {
@@ -610,7 +612,7 @@ void PoseGraph3D::DrainWorkQueue() {
   std::cerr << "WORK_QUEUE_PROFILE (work queue processed for) " << absl::FormatDuration(absl::Now() - process_work_queue_start) << std::endl;
   // We have to optimize again.
   std::cerr << "WORK_QUEUE_PROFILE (constraint builder when done) " << absl::FormatTime(absl::Now()) << std::endl;
-  
+  constraint_builder_start_ = absl::Now();
   constraint_builder_.WhenDone(
       [this](const constraints::ConstraintBuilder3D::Result& result) {
         HandleWorkQueue(result);
