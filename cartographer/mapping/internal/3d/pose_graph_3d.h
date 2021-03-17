@@ -296,6 +296,7 @@ class PoseGraph3D : public PoseGraph {
 
   bool initial_items_added{false};
   std::vector<absl::Time> drain_queue_enter_;
+  absl::Time constraint_builder_start_;
 
   // Allows querying and manipulating the pose graph by the 'trimmers_'. The
   // 'mutex_' of the pose graph is held while this class is used.
