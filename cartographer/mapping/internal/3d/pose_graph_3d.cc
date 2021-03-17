@@ -554,7 +554,7 @@ void PoseGraph3D::HandleWorkQueue(
 }
 
 void PoseGraph3D::DrainWorkQueue() {
-  if (drain_queue_enter_.size() % 10 == 0) {
+  if (drain_queue_enter_.size() % 1 == 0) {
     absl::MutexLock locker(&work_queue_mutex_);
     if (initial_items_added) {
       drain_queue_enter_.push_back(absl::Now());
@@ -576,7 +576,6 @@ void PoseGraph3D::DrainWorkQueue() {
     WorkItemType work_item_type;
     std::function<std::pair<WorkItem::Result, WorkItem::Details>()> work_item;
     {
-      absl::MutexLock locker(&work_queue_mutex_);
       if (work_queue_->empty()) {
         work_queue_.reset();
         return;
