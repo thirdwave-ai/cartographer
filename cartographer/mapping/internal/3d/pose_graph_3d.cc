@@ -477,6 +477,7 @@ void PoseGraph3D::DeleteTrajectoriesIfNeeded() {
 
 void PoseGraph3D::HandleWorkQueue(
     const constraints::ConstraintBuilder3D::Result& result) {
+  std::cerr << "WORK_QUEUE_PROFILE Start of handle work queue " << absl::FormatTime(absl::Now()) << std::endl;
   auto start_handle_work_queue = absl::Now();
   {
     absl::MutexLock locker(&mutex_);
@@ -554,19 +555,7 @@ void PoseGraph3D::HandleWorkQueue(
 }
 
 void PoseGraph3D::DrainWorkQueue() {
-  if (drain_queue_enter_.size() % 1 == 0) {
-    absl::MutexLock locker(&work_queue_mutex_);
-    if (initial_items_added) {
-      drain_queue_enter_.push_back(absl::Now());
-      std::cerr << "==========================================" << std::endl;
-      for (auto& time: drain_queue_enter_) {
-        std::cerr << "WORK_QUEUE_HISTORY " << absl::FormatTime(time) << ", " << work_queue_->empty() << std::endl;
-      }
-    }
-    if (!work_queue_->empty()) {
-      initial_items_added = true;
-    }
-  }
+  std::cerr << "WORK_QUEUE_PROFILE Drain WorkQueue start time " << absl::FormatTime(absl::Now()) << std::endl;
   bool process_work_queue = true;
   size_t work_queue_size;
   WorkItem::Details cummulative_queue_details;
