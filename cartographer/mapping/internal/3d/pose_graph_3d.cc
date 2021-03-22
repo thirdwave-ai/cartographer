@@ -26,6 +26,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <queue>
 
 #include "Eigen/Eigenvalues"
 #include "absl/memory/memory.h"
@@ -255,7 +256,8 @@ void PoseGraph3D::AddLandmarkData(int trajectory_id,
 }
 
 std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeConstraint(const NodeId& node_id,
-                                    const SubmapId& submap_id) {
+                                    const SubmapId& submap_id,
+                                    uint16_t kNearest = 0) {
   const transform::Rigid3d global_node_pose =
       optimization_problem_->node_data().at(node_id).global_pose;
 
@@ -312,7 +314,8 @@ std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeConstraint
     constraint_builder_.MaybeAddGlobalConstraint(
         submap_id, submap, node_id, constant_data, global_node_pose.rotation(),
         global_submap_pose.rotation(),
-        loop_closure_cb_);
+        loop_closure_cb_,
+        kNearest);
     return constraints::LoopClosureSearchType::GLOBAL_CONSTRAINT_SEARCH;
   }
   return {};
@@ -323,7 +326,6 @@ std::pair<WorkItem::Result, WorkItem::Details> PoseGraph3D::ComputeConstraintsFo
     std::vector<std::shared_ptr<const Submap3D>> insertion_submaps,
     const bool newly_finished_submap) {
   std::vector<SubmapId> submap_ids;
-  std::vector<SubmapId> finished_submap_ids;
   std::set<NodeId> newly_finished_submap_node_ids;
   WorkItem::Details details{
     {"IntraSubmapConstraints", 0},
@@ -332,6 +334,19 @@ std::pair<WorkItem::Result, WorkItem::Details> PoseGraph3D::ComputeConstraintsFo
     {"NewlyCompletedSubmapGlobalConstraintSearches", 0},
     {"NewlyCompletedSubmapLocalConstraintSearches", 0}
   };
+  auto cmp = [&node_id, this](const SubmapId& submap_id1, const SubmapId& submap_id2){
+    const transform::Rigid3d global_node_pose =
+        optimization_problem_->node_data().at(node_id).global_pose;
+
+    const transform::Rigid3d global_submap1_pose =
+        optimization_problem_->submap_data().at(submap_id1).global_pose;
+    const transform::Rigid3d global_submap2_pose =
+        optimization_problem_->submap_data().at(submap_id2).global_pose;
+    auto dist_to_submap_1 = (global_submap1_pose.translation() - global_node_pose.translation()).norm();
+    auto dist_to_submap_2 = (global_submap2_pose.translation() - global_node_pose.translation()).norm();
+    return(dist_to_submap_1 > dist_to_submap_2);
+  };
+  std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)> finished_submap_ids(cmp);
   {
     absl::MutexLock locker(&mutex_);
 
@@ -385,7 +400,7 @@ std::pair<WorkItem::Result, WorkItem::Details> PoseGraph3D::ComputeConstraintsFo
     for (const auto& submap_id_data : data_.submap_data) {
       if (submap_id_data.data.state == SubmapState::kFinished) {
         CHECK_EQ(submap_id_data.data.node_ids.count(node_id), 0);
-        finished_submap_ids.emplace_back(submap_id_data.id);
+        finished_submap_ids.push(submap_id_data.id);
       }
     }
     if (newly_finished_submap) {
@@ -398,8 +413,12 @@ std::pair<WorkItem::Result, WorkItem::Details> PoseGraph3D::ComputeConstraintsFo
     }
   }
 
-  for (const auto& submap_id : finished_submap_ids) {
-    auto res = ComputeConstraint(node_id, submap_id);
+  uint16_t kNearest = 0;
+  while(!finished_submap_ids.empty()) {
+    auto submap_id = finished_submap_ids.top();
+    finished_submap_ids.pop();
+    auto res = ComputeConstraint(node_id, submap_id, kNearest);
+    ++kNearest;
     if (res && *res == constraints::LoopClosureSearchType::GLOBAL_CONSTRAINT_SEARCH) {
       details["GlobalConstraintSearches"]++;
     }

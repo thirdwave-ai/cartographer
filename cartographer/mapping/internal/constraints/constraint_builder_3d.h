@@ -89,7 +89,8 @@ class ConstraintBuilder3D {
                           std::function<void(
                             scan_matching::FastCorrelativeScanMatcher3D::Result,  // Coarse search
                             std::optional<Constraint> 
-                          )> loop_closure_cb);
+                          )> loop_closure_cb,
+                          uint16_t kNearest);
 
   // Schedules exploring a new constraint between 'submap' identified by
   // 'submap_id' and the 'compressed_point_cloud' for 'node_id'.
@@ -136,6 +137,7 @@ class ConstraintBuilder3D {
 
   // The returned 'grid' and 'fast_correlative_scan_matcher' must only be
   // accessed after 'creation_task_handle' has completed.
+  const uint16_t kMaxNumberOfSubmapsToSearch = 5;
   const SubmapScanMatcher* DispatchScanMatcherConstruction(
       const SubmapId& submap_id, const Submap3D* submap)
       EXCLUSIVE_LOCKS_REQUIRED(mutex_);
