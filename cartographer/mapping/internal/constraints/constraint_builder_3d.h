@@ -89,7 +89,8 @@ class ConstraintBuilder3D {
                           std::function<void(
                             scan_matching::FastCorrelativeScanMatcher3D::Result,  // Coarse search
                             std::optional<Constraint> 
-                          )> loop_closure_cb);
+                          )> loop_closure_cb,
+                          int k_nearest=0);
 
   // Schedules exploring a new constraint between 'submap' identified by
   // 'submap_id' and the 'compressed_point_cloud' for 'node_id'.
@@ -126,6 +127,7 @@ class ConstraintBuilder3D {
   static void RegisterMetrics(metrics::FamilyFactory* family_factory);
 
  private:
+  const int kMaxNumberOfSubmapsToSearch = 5;
   struct SubmapScanMatcher {
     const HybridGrid* high_resolution_hybrid_grid = nullptr;
     const HybridGrid* low_resolution_hybrid_grid = nullptr;

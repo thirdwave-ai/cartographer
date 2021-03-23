@@ -83,9 +83,10 @@ bool ConstraintBuilder3D::MaybeAddConstraint(
     std::function<void(
       scan_matching::FastCorrelativeScanMatcher3D::Result,  // Coarse search
       std::optional<Constraint> 
-    )> loop_closure_cb) {
-  if ((global_node_pose.translation() - global_submap_pose.translation())
-          .norm() > options_.max_constraint_distance()) {
+    )> loop_closure_cb,
+    int k_nearest) {
+  if (((global_node_pose.translation() - global_submap_pose.translation())
+          .norm() > options_.max_constraint_distance()) || (k_nearest > kMaxNumberOfSubmapsToSearch)) {
     return false;
   }
   if (!sampler_.Pulse()) return false;
