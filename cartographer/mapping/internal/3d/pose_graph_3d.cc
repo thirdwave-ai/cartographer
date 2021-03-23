@@ -343,6 +343,7 @@ std::pair<WorkItem::Result, WorkItem::Details> PoseGraph3D::ComputeConstraintsFo
           optimization_problem_->submap_data().at(submap_id2).global_pose;
       auto dist_to_submap_1 = (global_submap1_pose.translation() - global_node_pose.translation()).norm();
       auto dist_to_submap_2 = (global_submap2_pose.translation() - global_node_pose.translation()).norm();
+      // using > for min-heap (lowest at the top)
       return(dist_to_submap_1 > dist_to_submap_2);
   };
   std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)> finished_submap_ids(cmp);
@@ -418,12 +419,6 @@ std::pair<WorkItem::Result, WorkItem::Details> PoseGraph3D::ComputeConstraintsFo
     finished_submap_ids.pop();
     auto res = ComputeConstraint(node_id, submap_id, k_nearest);
     ++k_nearest;
-    const transform::Rigid3d global_node_pose = optimization_problem_->node_data().at(node_id).global_pose;
-
-    const transform::Rigid3d global_submap_pose =
-        optimization_problem_->submap_data().at(submap_id).global_pose;
-    auto dist_to_submap = (global_submap_pose.translation() - global_node_pose.translation()).norm();
-    std::cout << "popping submap with distance: " << dist_to_submap << std::endl;
     if (res && *res == constraints::LoopClosureSearchType::GLOBAL_CONSTRAINT_SEARCH) {
       details["GlobalConstraintSearches"]++;
     }
