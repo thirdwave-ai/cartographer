@@ -252,7 +252,6 @@ void ConstraintBuilder3D::ComputeConstraint(
           {});
       return;
     } else {
-      std::cerr << "match full submap nullptr" << std::endl;
       return;
     }
   } else {
@@ -262,8 +261,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     }
     kConstraintsSearchedMetric->Increment();
     match_result = submap_scan_matcher.fast_correlative_scan_matcher->Match(
-        global_node_pose, global_submap_pose, *constant_data,
-        min_score);
+        global_node_pose, global_submap_pose, *constant_data, min_score);
 
     if (match_result) {
       match_result->trajectory_a = submap_id.trajectory_id;
@@ -285,7 +283,6 @@ void ConstraintBuilder3D::ComputeConstraint(
           {});
       return;
     } else {
-      std::cerr << "match full submap nullptr" << std::endl;
       return;
     }
   }
@@ -323,7 +320,7 @@ void ConstraintBuilder3D::ComputeConstraint(
             {constraint_transform, options_.loop_closure_translation_weight(),
              options_.loop_closure_rotation_weight()},
             Constraint::INTER_SUBMAP});
-  }   
+  }
   if (options_.log_matches()) {
     std::ostringstream info;
     info << "Node " << node_id << " with "
