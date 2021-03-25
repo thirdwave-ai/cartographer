@@ -93,6 +93,11 @@ struct Candidate3D {
   static Candidate3D Unsuccessful() {
     auto x = Candidate3D(0, Eigen::Array3i::Zero());
     x.offset.setZero();
+    // We set -1 here as a sentinel. We use some other sentinal values
+    // elsewhere to track what kinds of match failures we encounter.
+    //
+    // TODO(macmason): Rather than abuse an existing term, actually do this
+    // right.
     x.low_resolution_score = -1;
     return x;
   }
@@ -193,6 +198,8 @@ FastCorrelativeScanMatcher3D::MatchWithSearchParameters(
       search_parameters, discrete_scans, lowest_resolution_candidates,
       precomputation_grid_stack_->max_depth(), min_score);
   if (best_candidate.score > min_score) {
+    // The (-1, -1) for trajectory_{a, b} is ok here because our caller knows
+    // those values and will fill them in.
     return absl::make_unique<Result>(Result{
         true, best_candidate.score,
         GetPoseFromCandidate(discrete_scans, best_candidate).cast<double>(),
@@ -202,6 +209,8 @@ FastCorrelativeScanMatcher3D::MatchWithSearchParameters(
   if (best_candidate.scan_index >= discrete_scans.size()) {
     return nullptr;
   }
+  // The (-1, -1) for trajectory_{a, b} is ok here because our caller knows
+  // those values and will fill them in.
   return absl::make_unique<Result>(Result{
       false, best_candidate.score,
       GetPoseFromCandidate(discrete_scans, best_candidate).cast<double>(),
@@ -397,6 +406,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
         // Return if the candidate is bad because the following candidate will
         // not have better score.
         auto x = Candidate3D::Unsuccessful();
+        // -2 is our sentinel for this case.
         x.low_resolution_score = -2;
         return x;
       }
@@ -413,6 +423,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
 
     // All candidates have good scores but none passes the matching function.
     auto x = Candidate3D::Unsuccessful();
+    // -3 is our sentinel for this case.
     x.low_resolution_score = -3;
     return x;
   }
@@ -453,6 +464,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
                        best_high_resolution_candidate.score));
   }
   if (best_high_resolution_candidate.low_resolution_score == -1.0) {
+    // -4 is our sentinel for this case.
     best_high_resolution_candidate.low_resolution_score = -4.0;
   }
   return best_high_resolution_candidate;
