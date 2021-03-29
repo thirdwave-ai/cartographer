@@ -24,6 +24,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <queue>
 #include <sstream>
 #include <string>
 
@@ -203,6 +204,10 @@ void PoseGraph3D::AddTrajectoryIfNeeded(const int trajectory_id) {
     global_localization_samplers_[trajectory_id] =
         absl::make_unique<common::VariableRatioSampler>();
   }
+  if (!less_global_localization_samplers_[trajectory_id]) {
+    less_global_localization_samplers_[trajectory_id] =
+        absl::make_unique<common::FixedRatioSampler>(options_.less_global_sampling_ratio());
+  }
 }
 
 void PoseGraph3D::AddImuData(const int trajectory_id,
@@ -347,6 +352,7 @@ PoseGraph3D::ComputeConstraintsForNode(
   std::set<NodeId> newly_finished_submap_node_ids;
   WorkItem::Details details{{"IntraSubmapConstraints", 0},
                             {"GlobalConstraintSearches", 0},
+                            {"LessGlobalConstraintSearches", 0},
                             {"LocalConstraintSearches", 0},
                             {"NewlyCompletedSubmapGlobalConstraintSearches", 0},
                             {"NewlyCompletedSubmapLocalConstraintSearches", 0}};
@@ -440,6 +446,11 @@ PoseGraph3D::ComputeConstraintsForNode(
     }
   }
 
+  //Less-global localization search if we haven't connected  in a long time
+  if (ShouldRunLessGlobalSearch(node_id) && ComputeLessGlobalConstraint(node_id)) {
+    details["LessGlobalConstraintSearches"]++;
+  }
+
   if (newly_finished_submap) {
     const SubmapId newly_finished_submap_id = submap_ids.front();
     size_t nodes_in_range_submaps = 0;
@@ -488,6 +499,84 @@ PoseGraph3D::ComputeConstraintsForNode(
   return std::pair<WorkItem::Result, WorkItem::Details>{
       WorkItem::Result::kDoNotRunOptimization, details};
 }
+
+std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeLessGlobalConstraint(
+      const NodeId& node_id) {
+  auto cmp = [&node_id, this](const SubmapId& submap_id1, const SubmapId& submap_id2) {
+    const transform::Rigid3d global_node_pose =
+        optimization_problem_->node_data().at(node_id).global_pose;
+
+    const transform::Rigid3d global_submap1_pose =
+        optimization_problem_->submap_data().at(submap_id1).global_pose;
+    const transform::Rigid3d global_submap2_pose =
+        optimization_problem_->submap_data().at(submap_id2).global_pose;
+    auto dist_to_submap_1 = (global_submap1_pose.translation() - global_node_pose.translation()).norm();
+    auto dist_to_submap_2 = (global_submap2_pose.translation() - global_node_pose.translation()).norm();
+    // using > for min-heap (lowest at the top)
+    return(dist_to_submap_1 > dist_to_submap_2);
+  };
+  auto trajectory_id = node_id.trajectory_id;
+  if (!less_global_localization_samplers_.count(trajectory_id) ||
+      !less_global_localization_samplers_[trajectory_id]->Pulse()) {
+    return {};
+  }
+  std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)> finished_submap_ids(cmp);
+  {
+    absl::MutexLock locker(&mutex_);
+    for (const auto& submap_id_data : data_.submap_data) {
+      if (submap_id_data.data.state == SubmapState::kFinished) {
+        finished_submap_ids.push(submap_id_data.id);
+      }
+    }
+    int k_nearest = 0;
+    while(!finished_submap_ids.empty() && k_nearest < options_.k_nearest_submaps()) {
+      const TrajectoryNode::Data* constant_data;
+      auto submap_id = finished_submap_ids.top();
+      finished_submap_ids.pop();
+      ++k_nearest;
+
+      CHECK(data_.submap_data.at(submap_id).state == SubmapState::kFinished);
+      if (!data_.submap_data.at(submap_id).submap->insertion_finished()) {
+        continue;
+      }
+      const transform::Rigid3d global_node_pose =
+          optimization_problem_->node_data().at(node_id).global_pose;
+
+      const transform::Rigid3d global_submap_pose =
+          optimization_problem_->submap_data().at(submap_id).global_pose;
+
+      constant_data = data_.trajectory_nodes.at(node_id).constant_data.get();
+      const Submap3D* submap = static_cast<const Submap3D*>(
+          data_.submap_data.at(submap_id).submap.get());
+
+      constraint_builder_.MaybeAddGlobalConstraint(submap_id, submap, node_id, constant_data, 
+        global_node_pose.rotation(), global_submap_pose.rotation(), loop_closure_cb_);
+    }
+    return constraints::LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH;
+  }
+}
+
+// Call only newly inserted node
+bool PoseGraph3D::ShouldRunLessGlobalSearch(const NodeId& node_id) {
+  auto traj_state_map = GetTrajectoryStates();
+  auto current_trajectory = node_id.trajectory_id;
+  common::Time node_time = data_.trajectory_nodes.at(node_id).constant_data->time;
+  bool should_run = true;
+  for (auto&& [traj_idx, state] : traj_state_map) {
+    if (state != cartographer::mapping::PoseGraphInterface::TrajectoryState::ACTIVE || traj_idx == current_trajectory) {
+      continue;
+    }
+    const common::Time last_connection_time = 
+      data_.trajectory_connectivity_state.LastConnectionTime(current_trajectory, traj_idx);
+    
+    // If we have a connection within the window anywhere we should not run
+    if (node_time < last_connection_time + common::FromSeconds(options_.less_global_constraint_search_after_n_seconds())) {
+      should_run = false;
+    }
+    return should_run;
+  }
+}
+
 
 common::Time PoseGraph3D::GetLatestNodeTime(const NodeId& node_id,
                                             const SubmapId& submap_id) const {

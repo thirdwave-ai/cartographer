@@ -203,6 +203,11 @@ class PoseGraph3D : public PoseGraph {
       std::vector<std::shared_ptr<const Submap3D>> insertion_submaps,
       bool newly_finished_submap) LOCKS_EXCLUDED(mutex_);
 
+  bool ShouldRunLessGlobalSearch(const NodeId& node_id);
+  
+  std::optional<constraints::LoopClosureSearchType> ComputeLessGlobalConstraint(
+      const NodeId& node_id) LOCKS_EXCLUDED(mutex_);
+
   // Computes constraints for a node and submap pair.
   std::optional<constraints::LoopClosureSearchType> ComputeConstraint(
       const NodeId& node_id, const SubmapId& submap_id,
@@ -266,6 +271,10 @@ class PoseGraph3D : public PoseGraph {
   // We globally localize a fraction of the nodes from each trajectory.
   absl::flat_hash_map<int, std::unique_ptr<common::VariableRatioSampler>>
       global_localization_samplers_ GUARDED_BY(mutex_);
+
+  // We globally localize a fraction of the nodes from each trajectory.
+  absl::flat_hash_map<int, std::unique_ptr<common::FixedRatioSampler>>
+      less_global_localization_samplers_ GUARDED_BY(mutex_);
 
   // Number of nodes added since last loop closure.
   int num_nodes_since_last_loop_closure_ GUARDED_BY(mutex_) = 0;

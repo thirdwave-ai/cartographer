@@ -50,6 +50,7 @@ namespace constraints {
 
 enum class LoopClosureSearchType {
   GLOBAL_CONSTRAINT_SEARCH,
+  LESS_GLOBAL_CONSTRAINT_SEARCH, // global localization style search using knn
   LOCAL_CONSTRAINT_SEARCH
 };
 

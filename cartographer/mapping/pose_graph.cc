@@ -105,11 +105,18 @@ proto::PoseGraphOptions CreatePoseGraphOptions(
   CHECK_GT(options.max_num_final_iterations(), 0);
   options.set_global_sampling_ratio(
       parameter_dictionary->GetDouble("global_sampling_ratio"));
+  options.set_less_global_sampling_ratio(
+    parameter_dictionary->GetDouble("less_global_sampling_ratio")
+  );
   options.set_log_residual_histograms(
       parameter_dictionary->GetBool("log_residual_histograms"));
   options.set_global_constraint_search_after_n_seconds(
       parameter_dictionary->GetDouble(
           "global_constraint_search_after_n_seconds"));
+  options.set_less_global_constraint_search_after_n_seconds(
+      parameter_dictionary->GetDouble(
+          "less_global_constraint_search_after_n_seconds"));
+  options.set_k_nearest_submaps(parameter_dictionary->GetInt("k_nearest_submaps"));
   PopulateOverlappingSubmapsTrimmerOptions2D(&options, parameter_dictionary);
   return options;
 }
