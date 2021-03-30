@@ -112,7 +112,7 @@ class FastCorrelativeScanMatcher3D {
     const MatchingFunction* const low_resolution_matcher;
   };
   
-  SearchParameters ComputeBackOffSearchParameters(size_t cycles_since_connection, std::function<float(const transform::Rigid3f&)> low_resolution_matcher);
+  SearchParameters ComputeBackOffSearchParameters(size_t cycles_since_connection, std::function<float(const transform::Rigid3f&)> low_resolution_matcher) const;
 
   std::unique_ptr<Result> MatchWithSearchParameters(
       const SearchParameters& search_parameters,

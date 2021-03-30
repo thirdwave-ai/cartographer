@@ -135,7 +135,7 @@ FastCorrelativeScanMatcher3D::FastCorrelativeScanMatcher3D(
 
 FastCorrelativeScanMatcher3D::~FastCorrelativeScanMatcher3D() {}
 
-FastCorrelativeScanMatcher3D::SearchParameters FastCorrelativeScanMatcher3D::ComputeBackOffSearchParameters(size_t cycles_since_connection, std::function<float(const transform::Rigid3f&)> low_resolution_matcher) {
+FastCorrelativeScanMatcher3D::SearchParameters FastCorrelativeScanMatcher3D::ComputeBackOffSearchParameters(size_t cycles_since_connection, std::function<float(const transform::Rigid3f&)> low_resolution_matcher) const {
   if (cycles_since_connection < 5) {
     return FastCorrelativeScanMatcher3D::SearchParameters{
       common::RoundToInt(options_.linear_xy_search_window() / resolution_),
@@ -144,11 +144,11 @@ FastCorrelativeScanMatcher3D::SearchParameters FastCorrelativeScanMatcher3D::Com
     };
   }
   double linear_increase = static_cast<double>(cycles_since_connection-5) * 0.25;
-  double angular_increaes = static_cast<double>(cycles_since_connection-5) * 0.0872665; // 5 degree increment
+  double angular_increase = static_cast<double>(cycles_since_connection-5) * 0.0872665; // 5 degree increment
   return FastCorrelativeScanMatcher3D::SearchParameters{
     common::RoundToInt((options_.linear_xy_search_window() + linear_increase) / resolution_),
     common::RoundToInt(options_.linear_z_search_window() / resolution_),
-    options_.angular_search_window(), &low_resolution_matcher
+    options_.angular_search_window() + angular_increase, &low_resolution_matcher
   };
 }
 
@@ -160,10 +160,7 @@ FastCorrelativeScanMatcher3D::Match(
     size_t cycles_since_connection) const {
   const auto low_resolution_matcher = scan_matching::CreateLowResolutionMatcher(
       low_resolution_hybrid_grid_, &constant_data.low_resolution_point_cloud);
-  const SearchParameters search_parameters{
-      common::RoundToInt(options_.linear_xy_search_window() / resolution_),
-      common::RoundToInt(options_.linear_z_search_window() / resolution_),
-      options_.angular_search_window(), &low_resolution_matcher};
+  const SearchParameters search_parameters = ComputeBackOffSearchParameters(cycles_since_connection, low_resolution_matcher);
   return MatchWithSearchParameters(
       search_parameters, global_node_pose.cast<float>(),
       global_submap_pose.cast<float>(),
