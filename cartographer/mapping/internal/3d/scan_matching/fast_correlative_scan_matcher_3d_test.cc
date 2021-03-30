@@ -146,7 +146,7 @@ TEST_F(FastCorrelativeScanMatcher3DTest, CorrectPoseForMatch) {
     const std::unique_ptr<FastCorrelativeScanMatcher3D::Result> result =
         fast_correlative_scan_matcher->Match(
             transform::Rigid3d::Identity(), transform::Rigid3d::Identity(),
-            CreateConstantData(point_cloud_), kMinScore);
+            CreateConstantData(point_cloud_), kMinScore, 0);
     EXPECT_THAT(result, testing::NotNull());
     EXPECT_LT(kMinScore, result->score);
     EXPECT_LT(0.09f, result->rotational_score);
@@ -160,7 +160,7 @@ TEST_F(FastCorrelativeScanMatcher3DTest, CorrectPoseForMatch) {
         low_resolution_result = fast_correlative_scan_matcher->Match(
             transform::Rigid3d::Identity(), transform::Rigid3d::Identity(),
             CreateConstantData({{Eigen::Vector3f(42.f, 42.f, 42.f)}}),
-            kMinScore);
+            kMinScore, 0);
     EXPECT_THAT(low_resolution_result, testing::IsNull())
         << low_resolution_result->low_resolution_score;
   }

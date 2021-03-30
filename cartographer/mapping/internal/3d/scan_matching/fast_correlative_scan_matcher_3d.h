@@ -86,13 +86,14 @@ class FastCorrelativeScanMatcher3D {
   FastCorrelativeScanMatcher3D& operator=(const FastCorrelativeScanMatcher3D&) =
       delete;
 
+
   // Aligns the node with the given 'constant_data' within the 'hybrid_grid'
   // given 'global_node_pose' and 'global_submap_pose'. 'Result' is only
   // returned if a score above 'min_score' (excluding equality) is possible.
   std::unique_ptr<Result> Match(const transform::Rigid3d& global_node_pose,
                                 const transform::Rigid3d& global_submap_pose,
                                 const TrajectoryNode::Data& constant_data,
-                                float min_score) const;
+                                float min_score, size_t cycles_since_connection) const;
 
   // Aligns the node with the given 'constant_data' within the 'hybrid_grid'
   // given rotations which are expected to be approximately gravity aligned.
@@ -110,6 +111,8 @@ class FastCorrelativeScanMatcher3D {
     const double angular_search_window;  // radians
     const MatchingFunction* const low_resolution_matcher;
   };
+  
+  SearchParameters ComputeBackOffSearchParameters(size_t cycles_since_connection, std::function<float(const transform::Rigid3f&)> low_resolution_matcher);
 
   std::unique_ptr<Result> MatchWithSearchParameters(
       const SearchParameters& search_parameters,

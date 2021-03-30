@@ -167,6 +167,9 @@ class ConstraintBuilder3D {
 
   void RunWhenDoneCallback() LOCKS_EXCLUDED(mutex_);
 
+  void IncrementCyclesSinceConnection();
+  void ResetCyclesSinceConnection();
+
   const proto::ConstraintBuilderOptions options_;
   common::ThreadPoolInterface* thread_pool_;
   absl::Mutex mutex_;
@@ -203,6 +206,8 @@ class ConstraintBuilder3D {
   common::Histogram score_histogram_ GUARDED_BY(mutex_);
   common::Histogram rotational_score_histogram_ GUARDED_BY(mutex_);
   common::Histogram low_resolution_score_histogram_ GUARDED_BY(mutex_);
+
+  size_t cycles_since_connection_{0};  
 };
 
 }  // namespace constraints

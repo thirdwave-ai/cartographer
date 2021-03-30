@@ -261,7 +261,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     }
     kConstraintsSearchedMetric->Increment();
     match_result = submap_scan_matcher.fast_correlative_scan_matcher->Match(
-        global_node_pose, global_submap_pose, *constant_data, min_score);
+        global_node_pose, global_submap_pose, *constant_data, min_score, cycles_since_connection_);
 
     if (match_result) {
       match_result->trajectory_a = submap_id.trajectory_id;
