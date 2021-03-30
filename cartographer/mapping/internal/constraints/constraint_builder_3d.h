@@ -135,6 +135,10 @@ class ConstraintBuilder3D {
   // The idea submap density the above sampling ratio is tuned for
   size_t target_submap_selection();
 
+  // Dynamic search window params
+  void IncrementCyclesSinceConnection();
+  void ResetCyclesSinceConnection();
+
  private:
   struct SubmapScanMatcher {
     const HybridGrid* high_resolution_hybrid_grid = nullptr;
@@ -166,9 +170,6 @@ class ConstraintBuilder3D {
           loop_closure_cb = nullptr) LOCKS_EXCLUDED(mutex_);
 
   void RunWhenDoneCallback() LOCKS_EXCLUDED(mutex_);
-
-  void IncrementCyclesSinceConnection();
-  void ResetCyclesSinceConnection();
 
   const proto::ConstraintBuilderOptions options_;
   common::ThreadPoolInterface* thread_pool_;

@@ -377,6 +377,14 @@ int ConstraintBuilder3D::GetNumFinishedNodes() {
   return num_finished_nodes_;
 }
 
+void ConstraintBuilder3D::IncrementCyclesSinceConnection() {
+  cycles_since_connection_++;
+}
+void ConstraintBuilder3D::ResetCyclesSinceConnection() {
+  cycles_since_connection_ = 0;
+}
+
+
 double ConstraintBuilder3D::max_constraint_distance() {
   return options_.max_constraint_distance();
 }

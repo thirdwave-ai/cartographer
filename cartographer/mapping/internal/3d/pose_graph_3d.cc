@@ -566,6 +566,13 @@ void PoseGraph3D::HandleWorkQueue(
 
   {
     absl::MutexLock locker(&mutex_);
+
+    // Support dynamic search window
+    if (result.size() > 0) {
+      constraint_builder_.ResetCyclesSinceConnection();
+    } else {
+      constraint_builder_.IncrementCyclesSinceConnection();
+    }
     for (const Constraint& constraint : result) {
       UpdateTrajectoryConnectivity(constraint);
     }
