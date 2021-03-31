@@ -379,9 +379,11 @@ int ConstraintBuilder3D::GetNumFinishedNodes() {
 
 void ConstraintBuilder3D::IncrementCyclesSinceConnection() {
   cycles_since_connection_++;
+  std::cerr << "Constraint builder set to " << cycles_since_connection_ << "cycles since connection" << std::endl;
 }
 void ConstraintBuilder3D::ResetCyclesSinceConnection() {
   cycles_since_connection_ = 0;
+  std::cerr << "Constraint builder set to " << cycles_since_connection_ << "cycles since connection" << std::endl;
 }
 
 
