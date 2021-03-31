@@ -127,7 +127,7 @@ class ConstraintBuilder3D {
   static void RegisterMetrics(metrics::FamilyFactory* family_factory);
 
  private:
-  const int kMaxNumberOfSubmapsToSearch = 5;
+  const int kMaxNumberOfSubmapsToSearch = 7;
   struct SubmapScanMatcher {
     const HybridGrid* high_resolution_hybrid_grid = nullptr;
     const HybridGrid* low_resolution_hybrid_grid = nullptr;
