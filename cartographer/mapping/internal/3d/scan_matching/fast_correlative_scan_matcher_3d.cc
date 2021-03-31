@@ -136,7 +136,7 @@ FastCorrelativeScanMatcher3D::FastCorrelativeScanMatcher3D(
 FastCorrelativeScanMatcher3D::~FastCorrelativeScanMatcher3D() {}
 
 FastCorrelativeScanMatcher3D::SearchParameters FastCorrelativeScanMatcher3D::ComputeBackOffSearchParameters(size_t cycles_since_connection, std::function<float(const transform::Rigid3f&)> low_resolution_matcher) const {
-  if (cycles_since_connection < 2 || cycles_since_connection > 10) {
+  if (cycles_since_connection < 1 || cycles_since_connection > 10) {
     return FastCorrelativeScanMatcher3D::SearchParameters{
       common::RoundToInt(options_.linear_xy_search_window() / resolution_),
       common::RoundToInt(options_.linear_z_search_window() / resolution_),

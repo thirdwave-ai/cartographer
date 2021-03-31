@@ -568,6 +568,7 @@ void PoseGraph3D::HandleWorkQueue(
     absl::MutexLock locker(&mutex_);
 
     // Support dynamic search window
+    std::cerr << "Constraint building resulted in " << result.size() << " new connections" << std::endl;
     if (result.size() > 0) {
       constraint_builder_.ResetCyclesSinceConnection();
     } else {
