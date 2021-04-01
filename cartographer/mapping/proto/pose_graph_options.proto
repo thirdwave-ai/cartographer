@@ -58,7 +58,7 @@ message PoseGraphOptions {
   // globally rather than in a smaller search window.
   double global_constraint_search_after_n_seconds = 10;
 
-  double less_global_constraint_search_after_n_seconds = 12;
+  int32 less_global_constraint_search_after_n_cycles = 12;
 
   int32 k_nearest_submaps = 13;
 

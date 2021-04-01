@@ -113,9 +113,9 @@ proto::PoseGraphOptions CreatePoseGraphOptions(
   options.set_global_constraint_search_after_n_seconds(
       parameter_dictionary->GetDouble(
           "global_constraint_search_after_n_seconds"));
-  options.set_less_global_constraint_search_after_n_seconds(
-      parameter_dictionary->GetDouble(
-          "less_global_constraint_search_after_n_seconds"));
+  options.set_less_global_constraint_search_after_n_cycles(
+      parameter_dictionary->GetInt(
+          "less_global_constraint_search_after_n_cycles"));
   options.set_k_nearest_submaps(parameter_dictionary->GetInt("k_nearest_submaps"));
   PopulateOverlappingSubmapsTrimmerOptions2D(&options, parameter_dictionary);
   return options;

@@ -558,7 +558,7 @@ std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeLessGlobal
 
 // Call only newly inserted node
 bool PoseGraph3D::ShouldRunLessGlobalSearch(const NodeId& node_id) {
-  return cycles_since_last_connection_ > 1;
+  return cycles_since_last_connection_ > options_.less_global_constraint_search_after_n_cycles();
 }
 
 
