@@ -159,9 +159,9 @@ FastCorrelativeScanMatcher3D::SearchParameters FastCorrelativeScanMatcher3D::Com
   if (cycles_since_connection > options_.back_off_max_cycles_since_connection()) {
     capped_cycles_since_connection = options_.back_off_max_cycles_since_connection();
   }
-  double linear_increase = static_cast<double>(cycles_since_connection) * options_.back_off_linear_increment();
-  double angular_increase = static_cast<double>(cycles_since_connection) * options_.back_off_angular_increment(); // 5 degree increment
-  double z_increase = static_cast<double>(cycles_since_connection) * options_.back_off_z_increment();
+  double linear_increase = static_cast<double>(capped_cycles_since_connection) * options_.back_off_linear_increment();
+  double angular_increase = static_cast<double>(capped_cycles_since_connection) * options_.back_off_angular_increment(); // 5 degree increment
+  double z_increase = static_cast<double>(capped_cycles_since_connection) * options_.back_off_z_increment();
   return FastCorrelativeScanMatcher3D::SearchParameters{
     common::RoundToInt((options_.linear_xy_search_window() + linear_increase) / resolution_),
     common::RoundToInt((options_.linear_z_search_window() + z_increase) / resolution_),
