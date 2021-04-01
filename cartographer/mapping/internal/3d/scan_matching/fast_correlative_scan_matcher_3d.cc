@@ -148,12 +148,16 @@ FastCorrelativeScanMatcher3D::FastCorrelativeScanMatcher3D(
 FastCorrelativeScanMatcher3D::~FastCorrelativeScanMatcher3D() {}
 
 FastCorrelativeScanMatcher3D::SearchParameters FastCorrelativeScanMatcher3D::ComputeBackOffSearchParameters(size_t cycles_since_connection, std::function<float(const transform::Rigid3f&)> low_resolution_matcher) const {
-  if (cycles_since_connection < 1 || cycles_since_connection > 10) {
+  if (cycles_since_connection < options_.back_off_min_cycles_since_connection()) {
     return FastCorrelativeScanMatcher3D::SearchParameters{
       common::RoundToInt(options_.linear_xy_search_window() / resolution_),
       common::RoundToInt(options_.linear_z_search_window() / resolution_),
       options_.angular_search_window(), &low_resolution_matcher
     };
+  }
+  size_t capped_cycles_since_connection = cycles_since_connection;
+  if (cycles_since_connection > options_.back_off_max_cycles_since_connection()) {
+    capped_cycles_since_connection = options_.back_off_max_cycles_since_connection();
   }
   double linear_increase = static_cast<double>(cycles_since_connection) * options_.back_off_linear_increment();
   double angular_increase = static_cast<double>(cycles_since_connection) * options_.back_off_angular_increment(); // 5 degree increment
