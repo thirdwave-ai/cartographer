@@ -58,8 +58,11 @@ message PoseGraphOptions {
   // globally rather than in a smaller search window.
   double global_constraint_search_after_n_seconds = 10;
 
-  int32 less_global_constraint_search_after_n_cycles = 12;
+  // Run a global constriant search against the k-nearest submaps
+  // If we have added no loop closures after n optimization attemps
+  int32 less_global_constraint_search_after_n_optimizations = 12;
 
+  // Total k-nearest submaps
   int32 k_nearest_submaps = 13;
 
   message OverlappingSubmapsTrimmerOptions2D {

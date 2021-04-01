@@ -506,6 +506,8 @@ PoseGraph3D::ComputeConstraintsForNode(
 
 std::optional<constraints::LoopClosureSearchType>
 PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
+
+  // Sort submaps from closes to furthest  relative to a node
   auto cmp = [&node_id, this](const SubmapId& submap_id1,
                               const SubmapId& submap_id2) {
     const transform::Rigid3d global_node_pose =
@@ -524,20 +526,29 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
     // using > for min-heap (lowest at the top)
     return (dist_to_submap_1 > dist_to_submap_2);
   };
+
   auto trajectory_id = node_id.trajectory_id;
+
+  // Downsample loop closure attemps
   if (!less_global_localization_samplers_.count(trajectory_id) ||
       !less_global_localization_samplers_[trajectory_id]->Pulse()) {
     return {};
   }
+
+  // Create submap priority queue
   std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)>
       finished_submap_ids(cmp);
+
   {
     absl::MutexLock locker(&mutex_);
+    // Assemble priority queue of finished submap ids 
     for (const auto& submap_id_data : data_.submap_data) {
       if (submap_id_data.data.state == SubmapState::kFinished) {
         finished_submap_ids.push(submap_id_data.id);
       }
     }
+
+    // MaybeAddGlobalConstraint for the k-nearest
     int k_nearest = 0;
     while (!finished_submap_ids.empty() &&
            k_nearest < options_.k_nearest_submaps()) {
@@ -571,8 +582,8 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
 
 // Call only newly inserted node
 bool PoseGraph3D::ShouldRunLessGlobalSearch(const NodeId& node_id) {
-  return cycles_since_last_connection_ >
-         options_.less_global_constraint_search_after_n_cycles();
+  return optimizations_since_last_connection_ >=
+         options_.less_global_constraint_search_after_n_optimizations();
 }
 
 common::Time PoseGraph3D::GetLatestNodeTime(const NodeId& node_id,
@@ -651,9 +662,9 @@ void PoseGraph3D::HandleWorkQueue(
   }
   LOG(INFO) << "Constraints added on optimization cycle " << result.size();
   if (result.size() > 0) {
-    cycles_since_last_connection_ = 0;
+    optimizations_since_last_connection_ = 0;
   } else {
-    cycles_since_last_connection_++;
+    optimizations_since_last_connection_++;
   }
 
   {

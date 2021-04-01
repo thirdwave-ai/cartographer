@@ -311,7 +311,7 @@ class PoseGraph3D : public PoseGraph {
 
   absl::Time constraint_builder_start_;
   absl::Duration last_constraint_builder_dur_{absl::ZeroDuration()};
-  size_t cycles_since_last_connection_{0};
+  size_t optimizations_since_last_connection_{0};
 
   // Allows querying and manipulating the pose graph by the 'trimmers_'. The
   // 'mutex_' of the pose graph is held while this class is used.
