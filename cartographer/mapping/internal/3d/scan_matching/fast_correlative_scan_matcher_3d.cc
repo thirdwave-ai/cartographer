@@ -54,7 +54,19 @@ CreateFastCorrelativeScanMatcherOptions3D(
       parameter_dictionary->GetDouble("linear_z_search_window"));
   options.set_angular_search_window(
       parameter_dictionary->GetDouble("angular_search_window"));
+  options.set_back_off_min_cycles_since_connection(
+    parameter_dictionary->GetInt("back_off_min_cycles_since_connection"));
+  options.set_back_off_max_cycles_since_connection(
+    parameter_dictionary->GetInt("back_off_max_cycles_since_connection"));
+  options.set_back_off_linear_increment(
+    parameter_dictionary->GetDouble("back_off_linear_increment"));
+  options.set_back_off_angular_increment(
+    parameter_dictionary->GetDouble("back_off_angular_increment"));
+  options.set_back_off_z_increment(
+    parameter_dictionary->GetDouble("back_off_z_increment"));
+
   return options;
+
 }
 
 PrecomputationGridStack3D::PrecomputationGridStack3D(
@@ -143,11 +155,12 @@ FastCorrelativeScanMatcher3D::SearchParameters FastCorrelativeScanMatcher3D::Com
       options_.angular_search_window(), &low_resolution_matcher
     };
   }
-  double linear_increase = static_cast<double>(cycles_since_connection-5) * 0.25;
-  double angular_increase = static_cast<double>(cycles_since_connection-5) * 0.0872665; // 5 degree increment
+  double linear_increase = static_cast<double>(cycles_since_connection) * options_.back_off_linear_increment();
+  double angular_increase = static_cast<double>(cycles_since_connection) * options_.back_off_angular_increment(); // 5 degree increment
+  double z_increase = static_cast<double>(cycles_since_connection) * options_.back_off_z_increment();
   return FastCorrelativeScanMatcher3D::SearchParameters{
     common::RoundToInt((options_.linear_xy_search_window() + linear_increase) / resolution_),
-    common::RoundToInt(options_.linear_z_search_window() / resolution_),
+    common::RoundToInt((options_.linear_z_search_window() + z_increase) / resolution_),
     options_.angular_search_window() + angular_increase, &low_resolution_matcher
   };
 }

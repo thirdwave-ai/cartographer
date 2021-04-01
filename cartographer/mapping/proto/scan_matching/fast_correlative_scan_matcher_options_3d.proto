@@ -42,4 +42,12 @@ message FastCorrelativeScanMatcherOptions3D {
   // Minimum angular search window in which the best possible scan alignment
   // will be found.
   double angular_search_window = 7;
+
+  // Backoff parameters
+  int32 back_off_min_cycles_since_connection = 10;
+  int32 back_off_max_cycles_since_connection = 11;
+  double back_off_linear_increment = 12;
+  double back_off_angular_increment = 13;
+  double back_off_z_increment = 14;
+
 }
