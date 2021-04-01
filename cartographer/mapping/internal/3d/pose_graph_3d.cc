@@ -206,7 +206,8 @@ void PoseGraph3D::AddTrajectoryIfNeeded(const int trajectory_id) {
   }
   if (!less_global_localization_samplers_[trajectory_id]) {
     less_global_localization_samplers_[trajectory_id] =
-        absl::make_unique<common::FixedRatioSampler>(options_.less_global_sampling_ratio());
+        absl::make_unique<common::FixedRatioSampler>(
+            options_.less_global_sampling_ratio());
   }
 }
 
@@ -446,8 +447,9 @@ PoseGraph3D::ComputeConstraintsForNode(
     }
   }
 
-  //Less-global localization search if we haven't connected  in a long time
-  if (ShouldRunLessGlobalSearch(node_id) && ComputeLessGlobalConstraint(node_id)) {
+  // Less-global localization search if we haven't connected  in a long time
+  if (ShouldRunLessGlobalSearch(node_id) &&
+      ComputeLessGlobalConstraint(node_id)) {
     details["LessGlobalConstraintSearches"]++;
   }
 
@@ -459,7 +461,9 @@ PoseGraph3D::ComputeConstraintsForNode(
       const transform::Rigid3d global_node_pose =
           optimization_problem_->node_data().at(node_id).global_pose;
       const transform::Rigid3d global_submap_pose =
-          optimization_problem_->submap_data().at(newly_finished_submap_id).global_pose;
+          optimization_problem_->submap_data()
+              .at(newly_finished_submap_id)
+              .global_pose;
       if ((global_node_pose.translation() - global_submap_pose.translation())
               .norm() < constraint_builder_.max_constraint_distance()) {
         nodes_in_range_submaps++;
@@ -467,7 +471,7 @@ PoseGraph3D::ComputeConstraintsForNode(
     }
 
     submap_sampling_scaling =
-      ComputeSubmapSamplingScaling(nodes_in_range_submaps);
+        ComputeSubmapSamplingScaling(nodes_in_range_submaps);
     // We have a new completed submap, so we look into adding constraints for
     // old nodes.
     for (const auto& node_id_data : optimization_problem_->node_data()) {
@@ -500,9 +504,10 @@ PoseGraph3D::ComputeConstraintsForNode(
       WorkItem::Result::kDoNotRunOptimization, details};
 }
 
-std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeLessGlobalConstraint(
-      const NodeId& node_id) {
-  auto cmp = [&node_id, this](const SubmapId& submap_id1, const SubmapId& submap_id2) {
+std::optional<constraints::LoopClosureSearchType>
+PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
+  auto cmp = [&node_id, this](const SubmapId& submap_id1,
+                              const SubmapId& submap_id2) {
     const transform::Rigid3d global_node_pose =
         optimization_problem_->node_data().at(node_id).global_pose;
 
@@ -510,17 +515,22 @@ std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeLessGlobal
         optimization_problem_->submap_data().at(submap_id1).global_pose;
     const transform::Rigid3d global_submap2_pose =
         optimization_problem_->submap_data().at(submap_id2).global_pose;
-    auto dist_to_submap_1 = (global_submap1_pose.translation() - global_node_pose.translation()).norm();
-    auto dist_to_submap_2 = (global_submap2_pose.translation() - global_node_pose.translation()).norm();
+    auto dist_to_submap_1 =
+        (global_submap1_pose.translation() - global_node_pose.translation())
+            .norm();
+    auto dist_to_submap_2 =
+        (global_submap2_pose.translation() - global_node_pose.translation())
+            .norm();
     // using > for min-heap (lowest at the top)
-    return(dist_to_submap_1 > dist_to_submap_2);
+    return (dist_to_submap_1 > dist_to_submap_2);
   };
   auto trajectory_id = node_id.trajectory_id;
   if (!less_global_localization_samplers_.count(trajectory_id) ||
       !less_global_localization_samplers_[trajectory_id]->Pulse()) {
     return {};
   }
-  std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)> finished_submap_ids(cmp);
+  std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)>
+      finished_submap_ids(cmp);
   {
     absl::MutexLock locker(&mutex_);
     for (const auto& submap_id_data : data_.submap_data) {
@@ -529,7 +539,8 @@ std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeLessGlobal
       }
     }
     int k_nearest = 0;
-    while(!finished_submap_ids.empty() && k_nearest < options_.k_nearest_submaps()) {
+    while (!finished_submap_ids.empty() &&
+           k_nearest < options_.k_nearest_submaps()) {
       const TrajectoryNode::Data* constant_data;
       auto submap_id = finished_submap_ids.top();
       finished_submap_ids.pop();
@@ -549,8 +560,10 @@ std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeLessGlobal
       const Submap3D* submap = static_cast<const Submap3D*>(
           data_.submap_data.at(submap_id).submap.get());
 
-      constraint_builder_.MaybeAddGlobalConstraint(submap_id, submap, node_id, constant_data, 
-        global_node_pose.rotation(), global_submap_pose.rotation(), loop_closure_cb_);
+      constraint_builder_.MaybeAddGlobalConstraint(
+          submap_id, submap, node_id, constant_data,
+          global_node_pose.rotation(), global_submap_pose.rotation(),
+          loop_closure_cb_);
     }
     return constraints::LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH;
   }
@@ -558,9 +571,9 @@ std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeLessGlobal
 
 // Call only newly inserted node
 bool PoseGraph3D::ShouldRunLessGlobalSearch(const NodeId& node_id) {
-  return cycles_since_last_connection_ > options_.less_global_constraint_search_after_n_cycles();
+  return cycles_since_last_connection_ >
+         options_.less_global_constraint_search_after_n_cycles();
 }
-
 
 common::Time PoseGraph3D::GetLatestNodeTime(const NodeId& node_id,
                                             const SubmapId& submap_id) const {

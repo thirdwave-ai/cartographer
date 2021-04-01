@@ -204,7 +204,7 @@ class PoseGraph3D : public PoseGraph {
       bool newly_finished_submap) LOCKS_EXCLUDED(mutex_);
 
   bool ShouldRunLessGlobalSearch(const NodeId& node_id);
-  
+
   std::optional<constraints::LoopClosureSearchType> ComputeLessGlobalConstraint(
       const NodeId& node_id) LOCKS_EXCLUDED(mutex_);
 
