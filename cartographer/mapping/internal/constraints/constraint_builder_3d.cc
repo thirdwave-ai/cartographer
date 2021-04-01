@@ -225,6 +225,7 @@ void ConstraintBuilder3D::ComputeConstraint(
   // 2. Prune if the score is too low.
   // 3. Refine.
   if (match_full_submap) {
+    std::cerr << "GLOBAL_SEARCH_ATTEMPT: Node at " << global_node_pose << ", to Submap at " << global_submap_pose << std::endl;
     kGlobalConstraintsSearchedMetric->Increment();
     match_result =
         submap_scan_matcher.fast_correlative_scan_matcher->MatchFullSubmap(
