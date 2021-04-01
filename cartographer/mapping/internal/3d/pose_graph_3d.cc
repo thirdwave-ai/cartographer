@@ -571,6 +571,7 @@ bool PoseGraph3D::ShouldRunLessGlobalSearch(const NodeId& node_id) {
     
     // If we have a connection within the window anywhere we should not run
     if (node_time < last_connection_time + common::FromSeconds(options_.less_global_constraint_search_after_n_seconds())) {
+      std::cerr << "Last connection time with trajectory " << traj_idx << " " << common::ToSeconds(last_connection_time-node_time) << std::endl;
       should_run = false;
     }
     return should_run;
