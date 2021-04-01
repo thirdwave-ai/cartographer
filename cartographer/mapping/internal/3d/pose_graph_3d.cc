@@ -310,7 +310,8 @@ std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeConstraint
                                            global_submap_pose,
                                            loop_closure_cb_);
     return constraints::LoopClosureSearchType::LOCAL_CONSTRAINT_SEARCH;
-  } else if (maybe_add_global_constraint) {
+  } else if (maybe_add_global_constraint && ((global_node_pose.translation() - global_submap_pose.translation())
+          .norm() < 30.0)) {
     constraint_builder_.MaybeAddGlobalConstraint(
         submap_id, submap, node_id, constant_data, global_node_pose.rotation(),
         global_submap_pose.rotation(),
