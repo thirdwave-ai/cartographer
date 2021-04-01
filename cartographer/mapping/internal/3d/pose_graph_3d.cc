@@ -558,24 +558,7 @@ std::optional<constraints::LoopClosureSearchType> PoseGraph3D::ComputeLessGlobal
 
 // Call only newly inserted node
 bool PoseGraph3D::ShouldRunLessGlobalSearch(const NodeId& node_id) {
-  auto traj_state_map = GetTrajectoryStates();
-  auto current_trajectory = node_id.trajectory_id;
-  common::Time node_time = data_.trajectory_nodes.at(node_id).constant_data->time;
-  bool should_run = true;
-  for (auto&& [traj_idx, state] : traj_state_map) {
-    if (state != cartographer::mapping::PoseGraphInterface::TrajectoryState::ACTIVE || traj_idx == current_trajectory) {
-      continue;
-    }
-    const common::Time last_connection_time = 
-      data_.trajectory_connectivity_state.LastConnectionTime(current_trajectory, traj_idx);
-    
-    // If we have a connection within the window anywhere we should not run
-    if (node_time < last_connection_time + common::FromSeconds(options_.less_global_constraint_search_after_n_seconds())) {
-      std::cerr << "Last connection time with trajectory " << traj_idx << " " << common::ToSeconds(last_connection_time-node_time) << std::endl;
-      should_run = false;
-    }
-    return should_run;
-  }
+  return cycles_since_last_connection_ > 1;
 }
 
 
@@ -652,6 +635,12 @@ void PoseGraph3D::HandleWorkQueue(
     global_slam_optimization_callback_(
         trajectory_id_to_last_optimized_submap_id,
         trajectory_id_to_last_optimized_node_id);
+  }
+
+  if (result.size() > 0) {
+    cycles_since_last_connection_ = 0;
+  } else {
+    cycles_since_last_connection_++;
   }
 
   {
