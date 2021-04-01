@@ -636,7 +636,7 @@ void PoseGraph3D::HandleWorkQueue(
         trajectory_id_to_last_optimized_submap_id,
         trajectory_id_to_last_optimized_node_id);
   }
-
+  LOG(INFO) << "Constraints added on optimization cycle " << result.size();
   if (result.size() > 0) {
     cycles_since_last_connection_ = 0;
   } else {
