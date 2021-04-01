@@ -170,7 +170,7 @@ FastCorrelativeScanMatcher3D::MatchFullSubmap(
   const auto low_resolution_matcher = scan_matching::CreateLowResolutionMatcher(
       low_resolution_hybrid_grid_, &constant_data.low_resolution_point_cloud);
   const SearchParameters search_parameters{
-      linear_window_size, linear_window_size, M_PI, &low_resolution_matcher};
+      linear_window_size, linear_window_size, M_PI/2, &low_resolution_matcher};
   return MatchWithSearchParameters(
       search_parameters,
       transform::Rigid3f::Rotation(global_node_rotation.cast<float>()),
