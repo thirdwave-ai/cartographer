@@ -39,6 +39,11 @@ message FastCorrelativeScanMatcherOptions3D {
   // scan alignment will be found.
   double linear_z_search_window = 6;
 
+  // For less global search
+  double large_linear_xy_search_window = 10;
+  double large_linear_z_search_window = 11;
+  double large_angular_search_window = 12;
+
   // Minimum angular search window in which the best possible scan alignment
   // will be found.
   double angular_search_window = 7;

@@ -54,6 +54,12 @@ CreateFastCorrelativeScanMatcherOptions3D(
       parameter_dictionary->GetDouble("linear_z_search_window"));
   options.set_angular_search_window(
       parameter_dictionary->GetDouble("angular_search_window"));
+  options.set_large_linear_xy_search_window(
+      parameter_dictionary->GetDouble("large_linear_xy_search_window"));
+  options.set_large_linear_z_search_window(
+      parameter_dictionary->GetDouble("large_linear_z_search_window"));
+  options.set_large_angular_search_window(
+      parameter_dictionary->GetDouble("large_angular_search_window"));
   return options;
 }
 
