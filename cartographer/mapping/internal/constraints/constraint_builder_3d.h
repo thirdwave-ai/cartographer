@@ -92,6 +92,17 @@ class ConstraintBuilder3D {
           std::optional<Constraint>)>
           loop_closure_cb);
 
+  bool MaybeAddLessGlobalConstraint(
+      const SubmapId& submap_id, const Submap3D* submap, const NodeId& node_id,
+      const TrajectoryNode::Data* const constant_data,
+      const transform::Rigid3d& global_node_pose,
+      const transform::Rigid3d& global_submap_pose,
+      std::function<void(
+          scan_matching::FastCorrelativeScanMatcher3D::Result,  // Coarse search
+          std::optional<Constraint>)>
+          loop_closure_cb);
+  
+
   // Schedules exploring a new constraint between 'submap' identified by
   // 'submap_id' and the 'compressed_point_cloud' for 'node_id'.
   // This performs full-submap matching.
@@ -155,7 +166,7 @@ class ConstraintBuilder3D {
   // constraint.
   // As output, it may create a new Constraint in 'constraint'.
   void ComputeConstraint(
-      const SubmapId& submap_id, const NodeId& node_id, bool match_full_submap,
+      const SubmapId& submap_id, const NodeId& node_id, LoopClosureSearchType search_type,
       const TrajectoryNode::Data* const constant_data,
       const transform::Rigid3d& global_node_pose,
       const transform::Rigid3d& global_submap_pose,

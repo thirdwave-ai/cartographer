@@ -587,9 +587,10 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
                      .norm()
               << std::endl;
 
-    constraint_builder_.MaybeAddGlobalConstraint(
-        submap_id, submap, node_id, constant_data, global_node_pose.rotation(),
-        global_submap_pose.rotation(), loop_closure_cb_);
+    constraint_builder_.MaybeAddLessGlobalConstraint(
+      submap_id, submap, node_id, constant_data, global_node_pose,
+      global_submap_pose,
+      loop_closure_cb_);
   }
   return constraints::LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH;
 }
