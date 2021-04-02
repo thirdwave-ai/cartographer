@@ -226,10 +226,15 @@ void ConstraintBuilder3D::ComputeConstraint(
   // 3. Refine.
   if (match_full_submap) {
     kGlobalConstraintsSearchedMetric->Increment();
+    const auto before = absl::Now();
     match_result =
         submap_scan_matcher.fast_correlative_scan_matcher->MatchFullSubmap(
             global_node_pose.rotation(), global_submap_pose.rotation(),
             *constant_data, options_.global_localization_min_score());
+    const auto after = absl::Now();
+
+    std::cerr << "match_full_submap for submap " << submap_id << " node "
+              << node_id << " took " << after - before << std::endl;
 
     if (match_result) {
       match_result->trajectory_a = submap_id.trajectory_id;
