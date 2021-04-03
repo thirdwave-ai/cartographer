@@ -307,7 +307,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     match_result = submap_scan_matcher.fast_correlative_scan_matcher->LargeMatch(
         global_node_pose, global_submap_pose, *constant_data, min_score);
     const auto after = absl::Now();
-    std::cerr << "match_less_submap for submap " << submap_id << " node "
+    std::cerr << "match for submap " << submap_id << " node "
           << node_id << " took " << after - before << std::endl;
 
     if (match_result) {

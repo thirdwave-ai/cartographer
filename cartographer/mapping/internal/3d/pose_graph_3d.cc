@@ -532,7 +532,6 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
   if (!less_global_localization_samplers_[trajectory_id]->Pulse()) {
     return {};
   }
-  std::cerr << ">>>> Made it past the sampler!" << std::endl;
 
   // Create submap priority queue
   std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)>
@@ -580,13 +579,6 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
           data_.submap_data.at(submap_id).submap.get());
     }
 
-    std::cerr << ">>>> Adding k-nearest[" << k << "] submap_id: " << submap_id
-              << " node_id: " << node_id << " at norm "
-              << (global_node_pose.translation() -
-                  global_submap_pose.translation())
-                     .norm()
-              << std::endl;
-
     constraint_builder_.MaybeAddLessGlobalConstraint(
       submap_id, submap, node_id, constant_data, global_node_pose,
       global_submap_pose,
@@ -597,10 +589,6 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
 
 // Call only newly inserted node
 bool PoseGraph3D::ShouldRunLessGlobalSearch() {
-  std::cerr << ">>>> ShouldRunLessGlobalSearch: since_last: "
-            << optimizations_since_last_connection_ << " >= opt: "
-            << options_.less_global_constraint_search_after_n_optimizations()
-            << std::endl;
   return optimizations_since_last_connection_ >=
          options_.less_global_constraint_search_after_n_optimizations();
 }
