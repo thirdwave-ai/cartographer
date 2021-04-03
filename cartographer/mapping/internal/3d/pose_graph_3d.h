@@ -203,6 +203,10 @@ class PoseGraph3D : public PoseGraph {
       std::vector<std::shared_ptr<const Submap3D>> insertion_submaps,
       bool newly_finished_submap) LOCKS_EXCLUDED(mutex_);
 
+  // Run a loop closure search with a large window to relocalize the truck.
+  // Assumes we're suffering from localization drift so the search window
+  // is smaller than for a global localization search. Triggers if we haven't
+  // seen a loop closure in n optimization cycles
   bool ShouldRunLessGlobalSearch();
 
   std::optional<constraints::LoopClosureSearchType> ComputeLessGlobalConstraint(
@@ -272,7 +276,7 @@ class PoseGraph3D : public PoseGraph {
   absl::flat_hash_map<int, std::unique_ptr<common::VariableRatioSampler>>
       global_localization_samplers_ GUARDED_BY(mutex_);
 
-  // We globally localize a fraction of the nodes from each trajectory.
+  // Down sample medium range loop closure searches ("less-global localization")
   absl::flat_hash_map<int, std::unique_ptr<common::FixedRatioSampler>>
       less_global_localization_samplers_ GUARDED_BY(mutex_);
 

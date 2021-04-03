@@ -447,7 +447,7 @@ PoseGraph3D::ComputeConstraintsForNode(
     }
   }
 
-  // Less-global localization search if we haven't connected  in a long time
+  // Less-global localization search if we haven't connected in a long time
   if (ShouldRunLessGlobalSearch() && ComputeLessGlobalConstraint(node_id)) {
     details["LessGlobalConstraintSearches"]++;
   }
@@ -587,7 +587,7 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
   return constraints::LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH;
 }
 
-// Call only newly inserted node
+// Call when computing constraints for newly inserted nodes
 bool PoseGraph3D::ShouldRunLessGlobalSearch() {
   return optimizations_since_last_connection_ >=
          options_.less_global_constraint_search_after_n_optimizations();
@@ -667,7 +667,6 @@ void PoseGraph3D::HandleWorkQueue(
         trajectory_id_to_last_optimized_submap_id,
         trajectory_id_to_last_optimized_node_id);
   }
-  LOG(INFO) << "Constraints added on optimization cycle " << result.size();
   if (result.size() > 0) {
     optimizations_since_last_connection_ = 0;
   } else {

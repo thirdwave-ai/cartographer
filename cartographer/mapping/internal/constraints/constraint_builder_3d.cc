@@ -122,7 +122,7 @@ bool ConstraintBuilder3D::MaybeAddLessGlobalConstraint(
         scan_matching::FastCorrelativeScanMatcher3D::Result,  // Coarse search
         std::optional<Constraint>)>
         loop_closure_cb) {
-  // Question(vikram): Do we want this check
+  // If we've drifted out of max constraint distance something is really wrong
   if ((global_node_pose.translation() - global_submap_pose.translation())
           .norm() > options_.max_constraint_distance()) {
     return false;
@@ -271,6 +271,7 @@ void ConstraintBuilder3D::ComputeConstraint(
             *constant_data, options_.global_localization_min_score());
     const auto after = absl::Now();
 
+    // TODO(mac, vikram): Remove this printout once we're sure.
     std::cerr << "match_full_submap for submap " << submap_id << " node "
               << node_id << " took " << after - before << std::endl;
 
@@ -307,6 +308,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     match_result = submap_scan_matcher.fast_correlative_scan_matcher->LargeMatch(
         global_node_pose, global_submap_pose, *constant_data, min_score);
     const auto after = absl::Now();
+    // TODO(mac, vikram): Remove this printout once we're sure.
     std::cerr << "match for submap " << submap_id << " node "
           << node_id << " took " << after - before << std::endl;
 
