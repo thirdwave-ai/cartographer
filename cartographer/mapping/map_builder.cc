@@ -90,7 +90,8 @@ proto::MapBuilderOptions CreateMapBuilderOptions(
   return options;
 }
 
-MapBuilder::MapBuilder(const proto::MapBuilderOptions& options, MapBuilderCallbacks cbs)
+MapBuilder::MapBuilder(const proto::MapBuilderOptions& options,
+                       MapBuilderCallbacks cbs)
     : options_(options), thread_pool_(options.num_background_threads()) {
   CHECK(options.use_trajectory_builder_2d() ^
         options.use_trajectory_builder_3d());
@@ -107,8 +108,7 @@ MapBuilder::MapBuilder(const proto::MapBuilderOptions& options, MapBuilderCallba
         absl::make_unique<optimization::OptimizationProblem3D>(
             options_.pose_graph_options().optimization_problem_options(),
             cbs.optimization_cb),
-        &thread_pool_,
-        cbs);
+        &thread_pool_, cbs);
   }
   if (options.collate_by_trajectory()) {
     sensor_collator_ = absl::make_unique<sensor::TrajectoryCollator>();
@@ -210,7 +210,8 @@ std::string MapBuilder::SubmapToProto(
 }
 
 std::string MapBuilder::SubmapToProto(
-    const SubmapId& submap_id, proto::SubmapQuery::Response* const response, float min_z, float max_z) {
+    const SubmapId& submap_id, proto::SubmapQuery::Response* const response,
+    float min_z, float max_z) {
   if (submap_id.trajectory_id < 0 ||
       submap_id.trajectory_id >= num_trajectory_builders()) {
     return "Requested submap from trajectory " +
@@ -225,7 +226,7 @@ std::string MapBuilder::SubmapToProto(
            " but it does not exist: maybe it has been trimmed.";
   }
   submap_data.submap->ToResponseProto(submap_data.pose, min_z, max_z, response);
-  return "";      
+  return "";
 }
 
 void MapBuilder::SerializeState(bool include_unfinished_submaps,
@@ -264,7 +265,9 @@ std::map<int, int> MapBuilder::LoadState(
               .second)
         << "Duplicate trajectory ID: " << trajectory_proto.trajectory_id();
     trajectory_proto.set_trajectory_id(new_trajectory_id);
-    if (load_frozen_state) {
+    std::cerr << "Remapped trajectory " << i << " to " << new_trajectory_id
+              << std::endl;
+    if (load_frozen_state || i == 0) {
       pose_graph_->FreezeTrajectory(new_trajectory_id);
     }
   }
