@@ -594,8 +594,8 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
         global_submap_pose,
         loop_closure_cb_);
     }
-    return constraints::LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH;
   }
+  return constraints::LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH;
 }
 
 // Call when computing constraints for newly inserted nodes
