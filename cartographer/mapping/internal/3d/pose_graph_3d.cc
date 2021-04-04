@@ -553,7 +553,9 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
   }
 
   // MaybeAddGlobalConstraint for the k-nearest for each trajectory
+  std::cerr << "LESS GLOBAL k_nearest_by_traj_size: " << k_nearest_by_trajectory.size() << std::endl;
   for (auto&& [traj, finished_submap_ids] : k_nearest_by_trajectory) {
+    std::cerr << "LESS GLOBAL traj: " << traj << " has " << finished_submap_ids.size() << " submaps" << std::endl;
     (void)traj;
     for (int k = 0; k < options_.k_nearest_submaps(); k++) {
       if (finished_submap_ids.empty()) {
