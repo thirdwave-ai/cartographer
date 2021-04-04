@@ -54,6 +54,12 @@ CreateFastCorrelativeScanMatcherOptions3D(
       parameter_dictionary->GetDouble("linear_z_search_window"));
   options.set_angular_search_window(
       parameter_dictionary->GetDouble("angular_search_window"));
+  options.set_large_linear_xy_search_window(
+      parameter_dictionary->GetDouble("large_linear_xy_search_window"));
+  options.set_large_linear_z_search_window(
+      parameter_dictionary->GetDouble("large_linear_z_search_window"));
+  options.set_large_angular_search_window(
+      parameter_dictionary->GetDouble("large_angular_search_window"));
   return options;
 }
 
@@ -155,6 +161,26 @@ FastCorrelativeScanMatcher3D::Match(
 }
 
 std::unique_ptr<FastCorrelativeScanMatcher3D::Result>
+FastCorrelativeScanMatcher3D::LargeMatch(
+    const transform::Rigid3d& global_node_pose,
+    const transform::Rigid3d& global_submap_pose,
+    const TrajectoryNode::Data& constant_data, const float min_score) const {
+  const auto low_resolution_matcher = scan_matching::CreateLowResolutionMatcher(
+      low_resolution_hybrid_grid_, &constant_data.low_resolution_point_cloud);
+  const SearchParameters search_parameters{
+      common::RoundToInt(options_.large_linear_xy_search_window() / resolution_),
+      common::RoundToInt(options_.large_linear_z_search_window() / resolution_),
+      options_.large_angular_search_window(), &low_resolution_matcher};
+  return MatchWithSearchParameters(
+      search_parameters, global_node_pose.cast<float>(),
+      global_submap_pose.cast<float>(),
+      constant_data.high_resolution_point_cloud,
+      constant_data.rotational_scan_matcher_histogram,
+      constant_data.gravity_alignment, min_score);
+}
+
+
+std::unique_ptr<FastCorrelativeScanMatcher3D::Result>
 FastCorrelativeScanMatcher3D::MatchFullSubmap(
     const Eigen::Quaterniond& global_node_rotation,
     const Eigen::Quaterniond& global_submap_rotation,
@@ -170,7 +196,7 @@ FastCorrelativeScanMatcher3D::MatchFullSubmap(
   const auto low_resolution_matcher = scan_matching::CreateLowResolutionMatcher(
       low_resolution_hybrid_grid_, &constant_data.low_resolution_point_cloud);
   const SearchParameters search_parameters{
-      linear_window_size, linear_window_size, M_PI, &low_resolution_matcher};
+      linear_window_size, linear_window_size, M_PI/2, &low_resolution_matcher};
   return MatchWithSearchParameters(
       search_parameters,
       transform::Rigid3f::Rotation(global_node_rotation.cast<float>()),

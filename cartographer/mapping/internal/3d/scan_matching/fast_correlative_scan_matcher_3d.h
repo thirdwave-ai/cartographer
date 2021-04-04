@@ -94,6 +94,11 @@ class FastCorrelativeScanMatcher3D {
                                 const TrajectoryNode::Data& constant_data,
                                 float min_score) const;
 
+   std::unique_ptr<Result> LargeMatch(const transform::Rigid3d& global_node_pose,
+                                const transform::Rigid3d& global_submap_pose,
+                                const TrajectoryNode::Data& constant_data,
+                                float min_score) const;
+
   // Aligns the node with the given 'constant_data' within the 'hybrid_grid'
   // given rotations which are expected to be approximately gravity aligned.
   // 'Result' is only returned if a score above 'min_score' (excluding equality)

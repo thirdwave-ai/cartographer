@@ -102,7 +102,7 @@ bool ConstraintBuilder3D::MaybeAddConstraint(
   const auto* scan_matcher = DispatchScanMatcherConstruction(submap_id, submap);
   auto constraint_task = absl::make_unique<common::Task>();
   constraint_task->SetWorkItem([=]() LOCKS_EXCLUDED(mutex_) {
-    ComputeConstraint(submap_id, node_id, false, /* match_full_submap */
+    ComputeConstraint(submap_id, node_id, LoopClosureSearchType::LOCAL_CONSTRAINT_SEARCH,
                       constant_data, global_node_pose, global_submap_pose,
                       *scan_matcher, constraint, loop_closure_cb);
   });
@@ -112,6 +112,44 @@ bool ConstraintBuilder3D::MaybeAddConstraint(
   finish_node_task_->AddDependency(constraint_task_handle);
   return true;
 }
+
+bool ConstraintBuilder3D::MaybeAddLessGlobalConstraint(
+    const SubmapId& submap_id, const Submap3D* const submap,
+    const NodeId& node_id, const TrajectoryNode::Data* const constant_data,
+    const transform::Rigid3d& global_node_pose,
+    const transform::Rigid3d& global_submap_pose,
+    std::function<void(
+        scan_matching::FastCorrelativeScanMatcher3D::Result,  // Coarse search
+        std::optional<Constraint>)>
+        loop_closure_cb) {
+  // If we've drifted out of max constraint distance something is really wrong
+  if ((global_node_pose.translation() - global_submap_pose.translation())
+          .norm() > options_.max_constraint_distance()) {
+    return false;
+  }
+
+  absl::MutexLock locker(&mutex_);
+  if (when_done_) {
+    LOG(WARNING)
+        << "MaybeAddConstraint was called while WhenDone was scheduled.";
+  }
+  constraints_.emplace_back();
+  kQueueLengthMetric->Set(constraints_.size());
+  auto* const constraint = &constraints_.back();
+  const auto* scan_matcher = DispatchScanMatcherConstruction(submap_id, submap);
+  auto constraint_task = absl::make_unique<common::Task>();
+  constraint_task->SetWorkItem([=]() LOCKS_EXCLUDED(mutex_) {
+    ComputeConstraint(submap_id, node_id, LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH,
+                      constant_data, global_node_pose, global_submap_pose,
+                      *scan_matcher, constraint, loop_closure_cb);
+  });
+  constraint_task->AddDependency(scan_matcher->creation_task_handle);
+  auto constraint_task_handle =
+      thread_pool_->Schedule(std::move(constraint_task));
+  finish_node_task_->AddDependency(constraint_task_handle);
+  return true;
+}
+
 
 bool ConstraintBuilder3D::MaybeAddGlobalConstraint(
     const SubmapId& submap_id, const Submap3D* const submap,
@@ -133,7 +171,7 @@ bool ConstraintBuilder3D::MaybeAddGlobalConstraint(
   const auto* scan_matcher = DispatchScanMatcherConstruction(submap_id, submap);
   auto constraint_task = absl::make_unique<common::Task>();
   constraint_task->SetWorkItem([=]() LOCKS_EXCLUDED(mutex_) {
-    ComputeConstraint(submap_id, node_id, true, /* match_full_submap */
+    ComputeConstraint(submap_id, node_id, LoopClosureSearchType::GLOBAL_CONSTRAINT_SEARCH, /* search_type */
                       constant_data,
                       transform::Rigid3d::Rotation(global_node_rotation),
                       transform::Rigid3d::Rotation(global_submap_rotation),
@@ -203,7 +241,7 @@ ConstraintBuilder3D::DispatchScanMatcherConstruction(const SubmapId& submap_id,
 }
 
 void ConstraintBuilder3D::ComputeConstraint(
-    const SubmapId& submap_id, const NodeId& node_id, bool match_full_submap,
+    const SubmapId& submap_id, const NodeId& node_id, LoopClosureSearchType search_type,
     const TrajectoryNode::Data* const constant_data,
     const transform::Rigid3d& global_node_pose,
     const transform::Rigid3d& global_submap_pose,
@@ -224,12 +262,18 @@ void ConstraintBuilder3D::ComputeConstraint(
   // 1. Fast estimate using the fast correlative scan matcher.
   // 2. Prune if the score is too low.
   // 3. Refine.
-  if (match_full_submap) {
+  if (search_type == LoopClosureSearchType::GLOBAL_CONSTRAINT_SEARCH) {
     kGlobalConstraintsSearchedMetric->Increment();
+    const auto before = absl::Now();
     match_result =
         submap_scan_matcher.fast_correlative_scan_matcher->MatchFullSubmap(
             global_node_pose.rotation(), global_submap_pose.rotation(),
             *constant_data, options_.global_localization_min_score());
+    const auto after = absl::Now();
+
+    // TODO(mac, vikram): Remove this printout once we're sure.
+    std::cerr << "match_full_submap for submap " << submap_id << " node "
+              << node_id << " took " << after - before << std::endl;
 
     if (match_result) {
       match_result->trajectory_a = submap_id.trajectory_id;
@@ -254,6 +298,43 @@ void ConstraintBuilder3D::ComputeConstraint(
     } else {
       return;
     }
+  } else if(search_type == LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH) {
+    double min_score = options_.min_score();
+    if (submap_id.trajectory_id == node_id.trajectory_id) {
+      min_score = options_.intra_trajectory_min_score();
+    }
+    kConstraintsSearchedMetric->Increment();
+    const auto before = absl::Now();
+    match_result = submap_scan_matcher.fast_correlative_scan_matcher->LargeMatch(
+        global_node_pose, global_submap_pose, *constant_data, min_score);
+    const auto after = absl::Now();
+    // TODO(mac, vikram): Remove this printout once we're sure.
+    std::cerr << "match for submap " << submap_id << " node "
+          << node_id << " took " << after - before << std::endl;
+
+    if (match_result) {
+      match_result->trajectory_a = submap_id.trajectory_id;
+      match_result->trajectory_b = node_id.trajectory_id;
+    }
+
+    if (match_result != nullptr && match_result->success) {
+      // We've reported a successful local match.
+      CHECK_GT(match_result->score, options_.min_score());
+      kConstraintsFoundMetric->Increment();
+      kConstraintScoresMetric->Observe(match_result->score);
+      kConstraintRotationalScoresMetric->Observe(
+          match_result->rotational_score);
+      kConstraintLowResolutionScoresMetric->Observe(
+          match_result->low_resolution_score);
+    } else if (match_result != nullptr && loop_closure_cb) {
+      loop_closure_cb(
+          scan_matching::FastCorrelativeScanMatcher3D::Result(*match_result),
+          {});
+      return;
+    } else {
+      return;
+    }
+
   } else {
     double min_score = options_.min_score();
     if (submap_id.trajectory_id == node_id.trajectory_id) {
@@ -326,7 +407,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     info << "Node " << node_id << " with "
          << constant_data->high_resolution_point_cloud.size()
          << " points on submap " << submap_id << std::fixed;
-    if (match_full_submap) {
+    if (search_type == LoopClosureSearchType::GLOBAL_CONSTRAINT_SEARCH) {
       info << " matches";
     } else {
       // Compute the difference between (submap i <- node j) according to loop

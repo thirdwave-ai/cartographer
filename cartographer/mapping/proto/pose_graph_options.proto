@@ -48,6 +48,8 @@ message PoseGraphOptions {
   // localization.
   double global_sampling_ratio = 5;
 
+  double less_global_sampling_ratio = 14;
+
   // Whether to output histograms for the pose residuals.
   bool log_residual_histograms = 9;
 
@@ -55,6 +57,13 @@ message PoseGraphOptions {
   // added between two trajectories, loop closure searches will be performed
   // globally rather than in a smaller search window.
   double global_constraint_search_after_n_seconds = 10;
+
+  // Run a global constriant search against the k-nearest submaps
+  // If we have added no loop closures after n optimization attemps
+  int32 less_global_constraint_search_after_n_optimizations = 12;
+
+  // Total k-nearest submaps
+  int32 k_nearest_submaps = 13;
 
   message OverlappingSubmapsTrimmerOptions2D {
     int32 fresh_submaps_count = 1;

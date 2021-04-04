@@ -203,6 +203,15 @@ class PoseGraph3D : public PoseGraph {
       std::vector<std::shared_ptr<const Submap3D>> insertion_submaps,
       bool newly_finished_submap) LOCKS_EXCLUDED(mutex_);
 
+  // Run a loop closure search with a large window to relocalize the truck.
+  // Assumes we're suffering from localization drift so the search window
+  // is smaller than for a global localization search. Triggers if we haven't
+  // seen a loop closure in n optimization cycles
+  bool ShouldRunLessGlobalSearch();
+
+  std::optional<constraints::LoopClosureSearchType> ComputeLessGlobalConstraint(
+      const NodeId& node_id) LOCKS_EXCLUDED(mutex_);
+
   // Computes constraints for a node and submap pair.
   std::optional<constraints::LoopClosureSearchType> ComputeConstraint(
       const NodeId& node_id, const SubmapId& submap_id,
@@ -267,6 +276,10 @@ class PoseGraph3D : public PoseGraph {
   absl::flat_hash_map<int, std::unique_ptr<common::VariableRatioSampler>>
       global_localization_samplers_ GUARDED_BY(mutex_);
 
+  // Down sample medium range loop closure searches ("less-global localization")
+  absl::flat_hash_map<int, std::unique_ptr<common::FixedRatioSampler>>
+      less_global_localization_samplers_ GUARDED_BY(mutex_);
+
   // Number of nodes added since last loop closure.
   int num_nodes_since_last_loop_closure_ GUARDED_BY(mutex_) = 0;
 
@@ -302,6 +315,7 @@ class PoseGraph3D : public PoseGraph {
 
   absl::Time constraint_builder_start_;
   absl::Duration last_constraint_builder_dur_{absl::ZeroDuration()};
+  size_t optimizations_since_last_connection_{0};
 
   // Allows querying and manipulating the pose graph by the 'trimmers_'. The
   // 'mutex_' of the pose graph is held while this class is used.
