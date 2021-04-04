@@ -534,57 +534,66 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
   }
 
   // Create submap priority queue
-  std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)>
-      finished_submap_ids(cmp);
+  std::map<int, std::priority_queue<SubmapId, std::vector<SubmapId>, decltype(cmp)> > k_nearest_by_trajectory;
 
   {
     absl::MutexLock locker(&mutex_);
     // Assemble priority queue of finished submap ids
     for (const auto& submap_id_data : data_.submap_data) {
+      if (!k_nearest_by_trajectory.count(submap_id_data.id.trajectory_id)) {
+        k_nearest_by_trajectory.emplace(submap_id_data.id.trajectory_id, cmp);
+      }
       if (submap_id_data.data.state == SubmapState::kFinished) {
-        finished_submap_ids.push(submap_id_data.id);
+        auto traj_queue = k_nearest_by_trajectory.find(submap_id_data.id.trajectory_id);
+        if(traj_queue != k_nearest_by_trajectory.end()) {
+          traj_queue->second.push(submap_id_data.id);
+        }
       }
     }
   }
 
-  // MaybeAddGlobalConstraint for the k-nearest
-  for (int k = 0; k < options_.k_nearest_submaps(); k++) {
-    if (finished_submap_ids.empty()) {
-      break;
-    }
-
-    auto submap_id = finished_submap_ids.top();
-    finished_submap_ids.pop();
-
-    // To be filled in under the lock.
-    const TrajectoryNode::Data* constant_data;
-    const Submap3D* submap;
-    transform::Rigid3d global_node_pose;
-    transform::Rigid3d global_submap_pose;
-
-    {
-      absl::MutexLock locker(&mutex_);
-      CHECK(data_.submap_data.at(submap_id).state == SubmapState::kFinished);
-      if (!data_.submap_data.at(submap_id).submap->insertion_finished()) {
-        continue;
+  // MaybeAddGlobalConstraint for the k-nearest for each trajectory
+  for (auto&& [traj, finished_submap_ids] : k_nearest_by_trajectory) {
+    (void)traj;
+    for (int k = 0; k < options_.k_nearest_submaps(); k++) {
+      if (finished_submap_ids.empty()) {
+        break;
       }
-      global_node_pose =
-          optimization_problem_->node_data().at(node_id).global_pose;
 
-      global_submap_pose =
-          optimization_problem_->submap_data().at(submap_id).global_pose;
+      auto submap_id = finished_submap_ids.top();
+      finished_submap_ids.pop();
 
-      constant_data = data_.trajectory_nodes.at(node_id).constant_data.get();
-      submap = static_cast<const Submap3D*>(
-          data_.submap_data.at(submap_id).submap.get());
+      // To be filled in under the lock.
+      const TrajectoryNode::
+      Data* constant_data;
+      const Submap3D* submap;
+      transform::Rigid3d global_node_pose;
+      transform::Rigid3d global_submap_pose;
+
+      {
+        absl::MutexLock locker(&mutex_);
+        CHECK(data_.submap_data.at(submap_id).state == SubmapState::kFinished);
+        if (!data_.submap_data.at(submap_id).submap->insertion_finished()) {
+          continue;
+        }
+        global_node_pose =
+            optimization_problem_->node_data().at(node_id).global_pose;
+
+        global_submap_pose =
+            optimization_problem_->submap_data().at(submap_id).global_pose;
+
+        constant_data = data_.trajectory_nodes.at(node_id).constant_data.get();
+        submap = static_cast<const Submap3D*>(
+            data_.submap_data.at(submap_id).submap.get());
+      }
+
+      constraint_builder_.MaybeAddLessGlobalConstraint(
+        submap_id, submap, node_id, constant_data, global_node_pose,
+        global_submap_pose,
+        loop_closure_cb_);
     }
-
-    constraint_builder_.MaybeAddLessGlobalConstraint(
-      submap_id, submap, node_id, constant_data, global_node_pose,
-      global_submap_pose,
-      loop_closure_cb_);
+    return constraints::LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH;
   }
-  return constraints::LoopClosureSearchType::LESS_GLOBAL_CONSTRAINT_SEARCH;
 }
 
 // Call when computing constraints for newly inserted nodes
