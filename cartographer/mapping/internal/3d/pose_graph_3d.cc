@@ -545,9 +545,8 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
       }
       if (submap_id_data.data.state == SubmapState::kFinished) {
         auto traj_queue = k_nearest_by_trajectory.find(submap_id_data.id.trajectory_id);
-        if(traj_queue != k_nearest_by_trajectory.end()) {
-          traj_queue->second.push(submap_id_data.id);
-        }
+        CEHCK(traj_queue != k_nearest_by_trajectory.end());
+        traj_queue->second.push(submap_id_data.id);
       }
     }
   }
