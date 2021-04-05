@@ -681,6 +681,7 @@ void PoseGraph3D::HandleWorkQueue(
   } else {
     optimizations_since_last_connection_++;
   }
+  std::cerr << "Optimizations since last connection: " << optimizations_since_last_connection_ << std::endl;
 
   {
     absl::MutexLock locker(&mutex_);
