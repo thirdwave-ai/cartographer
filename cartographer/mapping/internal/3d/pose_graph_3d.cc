@@ -676,7 +676,7 @@ void PoseGraph3D::HandleWorkQueue(
       break;
     }
   }
-  if (result.size() > 0 || non_self_trajectory_connections) {
+  if (non_self_trajectory_connections) {
     optimizations_since_last_connection_ = 0;
   } else {
     optimizations_since_last_connection_++;
