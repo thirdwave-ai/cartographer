@@ -667,7 +667,16 @@ void PoseGraph3D::HandleWorkQueue(
         trajectory_id_to_last_optimized_submap_id,
         trajectory_id_to_last_optimized_node_id);
   }
-  if (result.size() > 0) {
+
+  // Intra-trajectory constraints don't help
+  bool non_self_trajectory_connections = false;
+  for (auto constraint : result) {
+    if (constraint.node_id.trajectory_id != constraint.submap_id.trajectory_id) {
+      non_self_trajectory_connections = true;
+      break;
+    }
+  }
+  if (non_self_trajectory_connections) {
     optimizations_since_last_connection_ = 0;
   } else {
     optimizations_since_last_connection_++;
