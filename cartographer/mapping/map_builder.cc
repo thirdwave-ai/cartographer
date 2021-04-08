@@ -265,9 +265,9 @@ std::map<int, int> MapBuilder::LoadState(
               .second)
         << "Duplicate trajectory ID: " << trajectory_proto.trajectory_id();
     trajectory_proto.set_trajectory_id(new_trajectory_id);
-    std::cerr << "Remapped trajectory " << i << " to " << new_trajectory_id
-              << std::endl;
+    LOG(INFO) << "Remapped trajectory " << i << " to " << new_trajectory_id;
     if (load_frozen_state || i == 0) {
+      LOG(INFO) << "Froze trajectory " << i;
       pose_graph_->FreezeTrajectory(new_trajectory_id);
     }
   }
