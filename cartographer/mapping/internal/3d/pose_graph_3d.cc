@@ -649,7 +649,9 @@ void PoseGraph3D::HandleWorkQueue(
     data_.constraints.insert(data_.constraints.end(), result.begin(),
                              result.end());
   }
+  std::cerr << "Time since last optimization " << absl::FormatDuration(absl::Now() - last_optimization_time_) << std::endl;
   RunOptimization();
+  last_optimization_time_ = absl::Now();
 
   if (global_slam_optimization_callback_) {
     std::map<int, NodeId> trajectory_id_to_last_optimized_node_id;
