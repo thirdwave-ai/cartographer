@@ -436,6 +436,9 @@ PoseGraph3D::ComputeConstraintsForNode(
       ComputeSubmapSamplingScaling(submaps_in_range_of_node);
 
   for (const auto& submap_id : finished_submap_ids) {
+    if(submap_id.trajectory_id == options_.ignore_a_trajectory()) {
+      continue;
+    }
     auto res = ComputeConstraint(node_id, submap_id, submap_sampling_scaling);
     if (res &&
         *res == constraints::LoopClosureSearchType::GLOBAL_CONSTRAINT_SEARCH) {
