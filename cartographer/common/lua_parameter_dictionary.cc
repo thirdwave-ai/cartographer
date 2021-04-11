@@ -288,7 +288,6 @@ std::unique_ptr<LuaParameterDictionary> LuaParameterDictionary::GetDictionary(
 }
 
 std::vector<int> LuaParameterDictionary::GetArrayOfInts(const std::string& key) {
-  CheckHasKeyAndReference(key);
   std::vector<int> values;
   auto lua_array = GetDictionary(key);
   GetArrayValues(L_, [&values, &lua_array] { values.push_back(lua_array->PopInt()); });
