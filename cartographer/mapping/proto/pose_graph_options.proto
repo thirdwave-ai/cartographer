@@ -65,6 +65,9 @@ message PoseGraphOptions {
   // Total k-nearest submaps
   int32 k_nearest_submaps = 13;
 
+  // Ignore a trajectory. -1 means keep all
+  int32 ignore_a_trajectory = 15;
+
   message OverlappingSubmapsTrimmerOptions2D {
     int32 fresh_submaps_count = 1;
     double min_covered_area = 2;
