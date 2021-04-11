@@ -66,6 +66,7 @@ class LuaParameterDictionary {
   int GetInt(const std::string& key);
   bool GetBool(const std::string& key);
   std::unique_ptr<LuaParameterDictionary> GetDictionary(const std::string& key);
+  std::vector<int> GetArrayOfInts(const std::string& key);
 
   // Gets an int from the dictionary and CHECK()s that it is non-negative.
   int GetNonNegativeInt(const std::string& key);
