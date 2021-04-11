@@ -117,7 +117,17 @@ proto::PoseGraphOptions CreatePoseGraphOptions(
       parameter_dictionary->GetInt(
           "less_global_constraint_search_after_n_optimizations"));
   options.set_k_nearest_submaps(parameter_dictionary->GetInt("k_nearest_submaps"));
+
   PopulateOverlappingSubmapsTrimmerOptions2D(&options, parameter_dictionary);
+  auto ignored_array_dict = parameter_dictionary->GetDictionary("ignored_trajectories");
+  if (!ignored_array_dict) {
+    return options;
+  }
+  auto ignored_array_doubles = ignored_array_dict->GetArrayValuesAsDoubles();
+  for (double t : ignored_array_doubles) {
+    options.ignored_trajectories(static_cast<int>(t));
+  }
+
   return options;
 }
 
