@@ -119,7 +119,9 @@ proto::PoseGraphOptions CreatePoseGraphOptions(
   options.set_k_nearest_submaps(parameter_dictionary->GetInt("k_nearest_submaps"));
   
   std::vector<int> ignored_trajectories = parameter_dictionary->GetArrayOfInts("ignore_a_trajectory");
+  std::cerr << "Option returned " << ignored_trajectories.size() << std::endl;
   for (auto& t : ignored_trajectories) {
+    std::cerr << "Adding t " << t << std::endl;
     options.add_ignore_a_trajectory(t);
   }
   
