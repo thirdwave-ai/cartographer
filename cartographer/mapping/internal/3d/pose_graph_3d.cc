@@ -551,6 +551,7 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
     }
   }
   auto ignored_trajectories = options_.ignore_a_trajectory();
+  std::cerr << "Filtering " << ignored_trajectories.size() << std::endl;
   for (auto i : ignored_trajectories) {
     std::cerr << "Filtering on " << i << std::endl;
   }
