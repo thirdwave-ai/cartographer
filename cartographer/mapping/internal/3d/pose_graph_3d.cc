@@ -551,6 +551,9 @@ PoseGraph3D::ComputeLessGlobalConstraint(const NodeId& node_id) {
     }
   }
   auto ignored_trajectories = options_.ignore_a_trajectory();
+  for (auto i : ignored_trajectories) {
+    std::cerr << "Filtering on " << i << std::endl;
+  }
   // MaybeAddGlobalConstraint for the k-nearest for each trajectory
   for (auto&& [traj, finished_submap_ids] : k_nearest_by_trajectory) {
     if (std::find(ignored_trajectories.begin(), ignored_trajectories.end(), traj) != ignored_trajectories.end()) {
