@@ -328,12 +328,13 @@ PoseGraph3D::ComputeConstraint(const NodeId& node_id, const SubmapId& submap_id,
   }
 
   if (maybe_add_local_constraint) {
-    constraint_builder_.MaybeAddConstraint(
+    bool res = constraint_builder_.MaybeAddConstraint(
         submap_id, submap, node_id, constant_data, global_node_pose,
         global_submap_pose,
         constraint_builder_.sampling_ratio() * sampling_scaling,
         loop_closure_cb_);
-    return constraints::LoopClosureSearchType::LOCAL_CONSTRAINT_SEARCH;
+    if(res) { return constraints::LoopClosureSearchType::LOCAL_CONSTRAINT_SEARCH; }
+    return {};
   } else if (maybe_add_global_constraint) {
     constraint_builder_.MaybeAddGlobalConstraint(
         submap_id, submap, node_id, constant_data, global_node_pose.rotation(),
