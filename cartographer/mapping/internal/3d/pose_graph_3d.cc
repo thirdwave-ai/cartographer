@@ -436,6 +436,10 @@ PoseGraph3D::ComputeConstraintsForNode(
   double submap_sampling_scaling =
       ComputeSubmapSamplingScaling(submaps_in_range_of_node);
 
+  // Less-global localization search if we haven't connected in a long time
+  if (ShouldRunLessGlobalSearch() && ComputeLessGlobalConstraint(node_id)) {
+    details["LessGlobalConstraintSearches"]++;
+  } else {
   for (const auto& submap_id : finished_submap_ids) {
     auto res = ComputeConstraint(node_id, submap_id, submap_sampling_scaling);
     if (res &&
@@ -446,11 +450,6 @@ PoseGraph3D::ComputeConstraintsForNode(
         *res == constraints::LoopClosureSearchType::LOCAL_CONSTRAINT_SEARCH) {
       details["LocalConstraintSearches"]++;
     }
-  }
-
-  // Less-global localization search if we haven't connected in a long time
-  if (ShouldRunLessGlobalSearch() && ComputeLessGlobalConstraint(node_id)) {
-    details["LessGlobalConstraintSearches"]++;
   }
 
   if (newly_finished_submap) {
@@ -491,6 +490,7 @@ PoseGraph3D::ComputeConstraintsForNode(
         }
       }
     }
+  }
   }
   constraint_builder_.NotifyEndOfNode();
   absl::MutexLock locker(&mutex_);
