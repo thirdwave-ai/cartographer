@@ -326,7 +326,7 @@ PoseGraph3D::ComputeConstraint(const NodeId& node_id, const SubmapId& submap_id,
     submap = static_cast<const Submap3D*>(
         data_.submap_data.at(submap_id).submap.get());
   }
-
+  maybe_add_local_constraint = false;
   if (maybe_add_local_constraint) {
     bool res = constraint_builder_.MaybeAddConstraint(
         submap_id, submap, node_id, constant_data, global_node_pose,
