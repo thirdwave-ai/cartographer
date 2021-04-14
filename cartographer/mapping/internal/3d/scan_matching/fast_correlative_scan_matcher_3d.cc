@@ -490,6 +490,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
     }
     ScoreCandidates(candidate_depth - 1, discrete_scans,
                     &higher_resolution_candidates);
+    (*search_count)++;
     best_high_resolution_candidate = std::max(
         best_high_resolution_candidate,
         BranchAndBound(search_parameters, discrete_scans,
