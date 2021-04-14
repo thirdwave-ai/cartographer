@@ -60,6 +60,8 @@ CreateFastCorrelativeScanMatcherOptions3D(
       parameter_dictionary->GetDouble("large_linear_z_search_window"));
   options.set_large_angular_search_window(
       parameter_dictionary->GetDouble("large_angular_search_window"));
+  options.set_max_branch_and_bound_steps(
+      parameter_dictionary->GetInt("max_branch_and_bound_steps"));
   return options;
 }
 
@@ -431,7 +433,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
     const std::vector<DiscreteScan3D>& discrete_scans,
     const std::vector<Candidate3D>& candidates, const int candidate_depth,
     float min_score, int* search_count) const {
-  if (*search_count > 100000) {
+  if (*search_count > options_.max_branch_and_bound_steps()) {
     auto x = Candidate3D::Unsuccessful();
     // -2 is our sentinel for this case.
     x.low_resolution_score = -5;
