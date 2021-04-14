@@ -430,11 +430,6 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
     const std::vector<DiscreteScan3D>& discrete_scans,
     const std::vector<Candidate3D>& candidates, const int candidate_depth,
     float min_score, int* search_count) const {
-  int init_search_count = 0;
-  int* search_count_ptr = &init_search_count;
-  if(search_count) {
-    search_count_ptr = search_count;
-  }
   if (candidate_depth == 0) {
     for (const Candidate3D& candidate : candidates) {
       if (candidate.score <= min_score) {
@@ -443,7 +438,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
         auto x = Candidate3D::Unsuccessful();
         // -2 is our sentinel for this case.
         x.low_resolution_score = -2;
-        (*search_count_ptr)++;
+        (*search_count)++;
         return x;
       }
       const float low_resolution_score =
@@ -453,7 +448,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
         // We found the best candidate that passes the matching function.
         Candidate3D best_candidate = candidate;
         best_candidate.low_resolution_score = low_resolution_score;
-        (*search_count_ptr)++;
+        (*search_count)++;
         return best_candidate;
       }
     }
@@ -462,7 +457,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
     auto x = Candidate3D::Unsuccessful();
     // -3 is our sentinel for this case.
     x.low_resolution_score = -3;
-    (*search_count_ptr)++;
+    (*search_count)++;
     return x;
   }
 
