@@ -221,11 +221,12 @@ FastCorrelativeScanMatcher3D::MatchWithSearchParameters(
   int search_counter = 0; // num base cases hit
   const std::vector<Candidate3D> lowest_resolution_candidates =
       ComputeLowestResolutionCandidates(search_parameters, discrete_scans);
+  absl::Time start = absl::Now();
   const Candidate3D best_candidate = BranchAndBound(
       search_parameters, discrete_scans, lowest_resolution_candidates,
       precomputation_grid_stack_->max_depth(), min_score, &search_counter);
-  
-  std::cerr << "Branch and bound hit " << search_counter << " base cases" << std::endl;
+  auto bb_duration = absl::Now() - start;
+  std::cerr << "Branch and bound hit " << search_counter << " base cases in " << absl::FormatDuration(bb_duration) << std::endl;
   if (best_candidate.score > min_score) {
     // The (-1, -1) for trajectory_{a, b} is ok here because our caller knows
     // those values and will fill them in.
