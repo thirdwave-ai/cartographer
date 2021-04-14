@@ -218,11 +218,14 @@ FastCorrelativeScanMatcher3D::MatchWithSearchParameters(
       search_parameters, point_cloud, rotational_scan_matcher_histogram,
       gravity_alignment, global_node_pose, global_submap_pose);
 
+  int search_counter = 0; // num base cases hit
   const std::vector<Candidate3D> lowest_resolution_candidates =
       ComputeLowestResolutionCandidates(search_parameters, discrete_scans);
   const Candidate3D best_candidate = BranchAndBound(
       search_parameters, discrete_scans, lowest_resolution_candidates,
-      precomputation_grid_stack_->max_depth(), min_score);
+      precomputation_grid_stack_->max_depth(), min_score, &search_counter);
+  
+  std::cerr << "Branch and bound hit " << search_counter << " base cases" << std::endl;
   if (best_candidate.score > min_score) {
     // The (-1, -1) for trajectory_{a, b} is ok here because our caller knows
     // those values and will fill them in.
@@ -425,7 +428,12 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
     const FastCorrelativeScanMatcher3D::SearchParameters& search_parameters,
     const std::vector<DiscreteScan3D>& discrete_scans,
     const std::vector<Candidate3D>& candidates, const int candidate_depth,
-    float min_score) const {
+    float min_score, int* search_count) const {
+  int init_search_count = 0;
+  int* search_count_ptr = &init_search_count;
+  if(search_count) {
+    search_count_ptr = search_count;
+  }
   if (candidate_depth == 0) {
     for (const Candidate3D& candidate : candidates) {
       if (candidate.score <= min_score) {
@@ -434,6 +442,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
         auto x = Candidate3D::Unsuccessful();
         // -2 is our sentinel for this case.
         x.low_resolution_score = -2;
+        (*search_count_ptr)++;
         return x;
       }
       const float low_resolution_score =
@@ -443,6 +452,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
         // We found the best candidate that passes the matching function.
         Candidate3D best_candidate = candidate;
         best_candidate.low_resolution_score = low_resolution_score;
+        (*search_count_ptr)++;
         return best_candidate;
       }
     }
@@ -451,6 +461,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
     auto x = Candidate3D::Unsuccessful();
     // -3 is our sentinel for this case.
     x.low_resolution_score = -3;
+    (*search_count_ptr)++;
     return x;
   }
 
