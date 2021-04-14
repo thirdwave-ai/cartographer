@@ -494,7 +494,7 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
         best_high_resolution_candidate,
         BranchAndBound(search_parameters, discrete_scans,
                        higher_resolution_candidates, candidate_depth - 1,
-                       best_high_resolution_candidate.score));
+                       best_high_resolution_candidate.score, search_count));
   }
   if (best_high_resolution_candidate.low_resolution_score == -1.0) {
     // -4 is our sentinel for this case.
