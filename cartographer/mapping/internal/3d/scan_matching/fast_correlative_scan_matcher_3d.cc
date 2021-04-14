@@ -226,10 +226,10 @@ FastCorrelativeScanMatcher3D::MatchWithSearchParameters(
       search_parameters, discrete_scans, lowest_resolution_candidates,
       precomputation_grid_stack_->max_depth(), min_score, &search_counter);
   auto bb_duration = absl::Now() - start;
-  std::cerr << "Branch and bound hit " << search_counter << " base cases in " << absl::FormatDuration(bb_duration) << std::endl;
   if (best_candidate.score > min_score) {
     // The (-1, -1) for trajectory_{a, b} is ok here because our caller knows
     // those values and will fill them in.
+    std::cerr << "Branch and bound succeeded " << search_counter << " steps in " << absl::FormatDuration(bb_duration) << std::endl;
     return absl::make_unique<Result>(Result{
         true, best_candidate.score,
         GetPoseFromCandidate(discrete_scans, best_candidate).cast<double>(),
@@ -239,6 +239,7 @@ FastCorrelativeScanMatcher3D::MatchWithSearchParameters(
   if (best_candidate.scan_index >= discrete_scans.size()) {
     return nullptr;
   }
+  std::cerr << "Branch and bound failed " << search_counter << " steps in " << absl::FormatDuration(bb_duration) << std::endl;
   // The (-1, -1) for trajectory_{a, b} is ok here because our caller knows
   // those values and will fill them in.
   return absl::make_unique<Result>(Result{
@@ -430,13 +431,6 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
     const std::vector<DiscreteScan3D>& discrete_scans,
     const std::vector<Candidate3D>& candidates, const int candidate_depth,
     float min_score, int* search_count) const {
-  if (*search_count > 40000) {
-    auto x = Candidate3D::Unsuccessful();
-    // -2 is our sentinel for this case.
-    x.low_resolution_score = -5;
-    (*search_count)++;
-    return x;
-  }
   if (candidate_depth == 0) {
     for (const Candidate3D& candidate : candidates) {
       if (candidate.score <= min_score) {
