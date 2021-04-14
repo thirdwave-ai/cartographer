@@ -430,6 +430,13 @@ Candidate3D FastCorrelativeScanMatcher3D::BranchAndBound(
     const std::vector<DiscreteScan3D>& discrete_scans,
     const std::vector<Candidate3D>& candidates, const int candidate_depth,
     float min_score, int* search_count) const {
+  if (*search_count > 40000) {
+    auto x = Candidate3D::Unsuccessful();
+    // -2 is our sentinel for this case.
+    x.low_resolution_score = -5;
+    (*search_count)++;
+    return x;
+  }
   if (candidate_depth == 0) {
     for (const Candidate3D& candidate : candidates) {
       if (candidate.score <= min_score) {
