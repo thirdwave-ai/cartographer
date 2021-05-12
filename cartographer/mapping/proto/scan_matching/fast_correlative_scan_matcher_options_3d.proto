@@ -48,4 +48,6 @@ message FastCorrelativeScanMatcherOptions3D {
   double large_linear_z_search_window = 11;
   double large_angular_search_window = 12;
 
+  int32 max_branch_and_bound_steps = 13;
+
 }
