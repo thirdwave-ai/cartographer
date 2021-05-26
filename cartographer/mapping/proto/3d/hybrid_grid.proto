@@ -28,5 +28,11 @@ message HybridGrid {
 }
 
 message HybridGridPyramid {
+  sint32 max_x = 2;
+  sint32 max_y = 3;
+  sint32 max_z = 4;
+  sint32 min_x = 5;
+  sint32 min_y = 6;
+  sint32 min_z = 7;
   repeated HybridGrid layers = 1;
 }
