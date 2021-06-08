@@ -395,7 +395,7 @@ void ConstraintBuilder3D::ComputeConstraint(
       Constraint::INTER_SUBMAP});
   if (!logged_a_loop_closure) {
     logged_a_loop_closure = true;
-    auto point_cloud_proto = CompressedPointCloud(constant_data->high_resolution_point_cloud).ToProto();
+    auto point_cloud_proto = cartographer::sensor::CompressedPointCloud(constant_data->high_resolution_point_cloud).ToProto();
     std::string serialized;
     CHECK(point_cloud_proto.SerializeToString(&serialized)) << "Unable to serialize protobuf";
     // Open the File
