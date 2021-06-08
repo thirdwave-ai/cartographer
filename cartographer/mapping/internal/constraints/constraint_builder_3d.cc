@@ -276,9 +276,12 @@ void ConstraintBuilder3D::ComputeConstraint(
               << node_id << " took " << after - before << std::endl;
 
     if (match_result) {
+      std::cerr << "with score " << match_result->score << std::endl;
       match_result->trajectory_a = submap_id.trajectory_id;
       match_result->trajectory_b = node_id.trajectory_id;
-    }
+    }else{
+            std::cerr << "failed " << std::endl;
+        }
 
     if (match_result != nullptr && match_result->success) {
       CHECK_GT(match_result->score, options_.global_localization_min_score());
