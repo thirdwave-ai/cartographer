@@ -34,6 +34,7 @@
 #include "cartographer/metrics/counter.h"
 #include "cartographer/metrics/gauge.h"
 #include "cartographer/metrics/histogram.h"
+#include "cartographer/sensor/proto/sensor.pb.h"
 #include "cartographer/transform/transform.h"
 #include "glog/logging.h"
 
@@ -392,6 +393,17 @@ void ConstraintBuilder3D::ComputeConstraint(
       {constraint_transform, options_.loop_closure_translation_weight(),
        options_.loop_closure_rotation_weight()},
       Constraint::INTER_SUBMAP});
+  if (!logged_a_loop_closure) {
+    logged_a_loop_closure = true;
+    auto point_cloud_proto = CompressedPointCloud(constant_data->high_resolution_point_cloud).ToProto();
+    std::string serialized;
+    CHECK(point_cloud_proto.SerializeToString(&serialized)) << "Unable to serialize protobuf";
+    // Open the File
+    std::ofstream out("/home/vikram/slices2/loop_closure_to_submap.pb");
+    // Write objects to file
+    out << serialized;
+    out.close();
+  }
   if (loop_closure_cb) {
     loop_closure_cb(
         scan_matching::FastCorrelativeScanMatcher3D::Result(*match_result),
