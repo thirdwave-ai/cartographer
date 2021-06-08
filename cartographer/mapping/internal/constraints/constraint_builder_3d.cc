@@ -22,7 +22,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
-#include <ostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 
