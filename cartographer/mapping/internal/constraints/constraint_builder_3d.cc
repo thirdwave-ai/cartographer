@@ -400,7 +400,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     std::string serialized;
     CHECK(point_cloud_proto.SerializeToString(&serialized)) << "Unable to serialize protobuf";
     // Open the File
-    std::ofstream out("/home/vikram/slices2/loop_closure_to_submap.pb");
+    std::ofstream out("/data/loop_closure_to_submap.pb");
     // Write objects to file
     out << serialized;
     out.close();
