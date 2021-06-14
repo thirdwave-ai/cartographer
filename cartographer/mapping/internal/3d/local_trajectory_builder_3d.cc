@@ -278,6 +278,8 @@ LocalTrajectoryBuilder3D::AddAccumulatedRangeData(
       options_.high_resolution_adaptive_voxel_filter_options());
   const sensor::PointCloud high_resolution_point_cloud_in_tracking =
       adaptive_voxel_filter.Filter(filtered_range_data_in_tracking.returns);
+  std::cerr << "FILTERED POINTCLOUD " << high_resolution_point_cloud_in_tracking.size() << std::endl;
+  std::cerr << "UNFILTERED POINTCLOUD " << filtered_range_data_in_tracking.returns.size() << std::endl;
   if (high_resolution_point_cloud_in_tracking.empty()) {
     LOG(WARNING) << "Dropped empty high resolution point cloud data.";
     return nullptr;
