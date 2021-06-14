@@ -394,8 +394,8 @@ void ConstraintBuilder3D::ComputeConstraint(
       {constraint_transform, options_.loop_closure_translation_weight(),
        options_.loop_closure_rotation_weight()},
       Constraint::INTER_SUBMAP});
-  if (!logged_a_loop_closure) {
-    logged_a_loop_closure = true;
+  if (logged_a_loop_closure < 10) {
+    logged_a_loop_closure++;
     const transform::Rigid3d node_to_submap =
       global_submap_pose.inverse() * global_node_pose;
     const transform::Rigid3d pose(
@@ -410,11 +410,12 @@ void ConstraintBuilder3D::ComputeConstraint(
     std::string serialized;
     CHECK(point_cloud_proto.SerializeToString(&serialized)) << "Unable to serialize protobuf";
     // Open the File
-    std::ofstream out("/data/loop_closure_to_submap.pb");
+    std::ofstream out("/data/loop_closure_to_submap"+ std::to_string(logged_a_loop_closure) + ".pb");
     // Write objects to file
     out << serialized;
     out.close();
   }
+  std::cerr << "POINTCLOUD SIZE " << constant_data->high_resolution_point_cloud.size() << std::endl;
   if (loop_closure_cb) {
     loop_closure_cb(
         scan_matching::FastCorrelativeScanMatcher3D::Result(*match_result),

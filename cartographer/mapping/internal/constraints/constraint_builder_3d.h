@@ -216,7 +216,7 @@ class ConstraintBuilder3D {
   common::Histogram rotational_score_histogram_ GUARDED_BY(mutex_);
   common::Histogram low_resolution_score_histogram_ GUARDED_BY(mutex_);
 
-  bool logged_a_loop_closure{false};
+  int logged_a_loop_closure{0};
 };
 
 }  // namespace constraints
