@@ -396,7 +396,8 @@ void ConstraintBuilder3D::ComputeConstraint(
       Constraint::INTER_SUBMAP});
   if (!logged_a_loop_closure) {
     logged_a_loop_closure = true;
-    auto aligned_cloud = cartographer::sensor::TransformPointCloud(constant_data->high_resolution_point_cloud, cartographer::transform::Rigid3d::Rotation(constant_data->gravity_alignment));
+    auto rotation = cartographer::transform::Rigid3f::Rotation(constant_data->gravity_alignment.cast<float>());
+    auto aligned_cloud = cartographer::sensor::TransformPointCloud(constant_data->high_resolution_point_cloud, rotation);
 
     auto point_cloud_proto = cartographer::sensor::CompressedPointCloud(aligned_cloud).ToProto();
     std::string serialized;
