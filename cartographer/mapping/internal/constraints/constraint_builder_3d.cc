@@ -396,15 +396,15 @@ void ConstraintBuilder3D::ComputeConstraint(
       Constraint::INTER_SUBMAP});
   if (!logged_a_loop_closure) {
     logged_a_loop_closure = true;
-    const transform::Rigid3f node_to_submap =
+    const transform::Rigid3d node_to_submap =
       global_submap_pose.inverse() * global_node_pose;
-    const transform::Rigid3f pose(
+    const transform::Rigid3d pose(
       node_to_submap.translation(),
       global_submap_pose.rotation().inverse() *
       global_node_pose.rotation());
 
 
-    auto aligned_cloud = cartographer::sensor::TransformPointCloud(constant_data->high_resolution_point_cloud, pose);
+    auto aligned_cloud = cartographer::sensor::TransformPointCloud(constant_data->high_resolution_point_cloud, pose.cast<float>());
 
     auto point_cloud_proto = cartographer::sensor::CompressedPointCloud(aligned_cloud).ToProto();
     std::string serialized;
