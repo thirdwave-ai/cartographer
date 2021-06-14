@@ -415,7 +415,8 @@ void ConstraintBuilder3D::ComputeConstraint(
     out << serialized;
     out.close();
   }
-  std::cerr << "POINTCLOUD SIZE " << constant_data->high_resolution_point_cloud.size() << std::endl;
+  std::cerr << "HIGH POINTCLOUD SIZE " << constant_data->high_resolution_point_cloud.size() << std::endl;
+  std::cerr << "LOW POINTCLOUD SIZE " << constant_data->low_resolution_point_cloud.size() << std::endl;
   if (loop_closure_cb) {
     loop_closure_cb(
         scan_matching::FastCorrelativeScanMatcher3D::Result(*match_result),
