@@ -414,6 +414,7 @@ void ConstraintBuilder3D::ComputeConstraint(
     // Write objects to file
     out << serialized;
     out.close();
+    std::cerr << "Matched " << logged_a_loop_closure << " to submap " << submap_id << std::endl;
   }
   if (loop_closure_cb) {
     loop_closure_cb(
