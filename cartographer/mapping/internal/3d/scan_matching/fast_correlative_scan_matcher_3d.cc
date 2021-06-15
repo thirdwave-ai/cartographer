@@ -331,6 +331,7 @@ std::vector<DiscreteScan3D> FastCorrelativeScanMatcher3D::GenerateDiscreteScans(
     if (scores[i] < options_.min_rotational_score()) {
       continue;
     }
+    std::cerr << "Rotational Scores " << scores[i] << std::endl;
     const Eigen::Vector3f angle_axis(0.f, 0.f, angles[i]);
     // It's important to apply the 'angle_axis' rotation between the translation
     // and rotation of the 'initial_pose', so that the rotation is around the
