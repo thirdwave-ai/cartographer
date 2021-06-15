@@ -343,6 +343,7 @@ std::vector<DiscreteScan3D> FastCorrelativeScanMatcher3D::GenerateDiscreteScans(
     result.push_back(
         DiscretizeScan(search_parameters, point_cloud, pose, scores[i]));
   }
+  std::cerr << "ROTATIONAL SCAN MATCHER filters down to " << result.size() << std::endl;
   return result;
 }
 
